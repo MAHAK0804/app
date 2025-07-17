@@ -20,13 +20,11 @@ import WheelColorPicker from "react-native-wheel-color-picker";
 import * as ImagePicker from "expo-image-picker";
 import { captureRef } from "react-native-view-shot";
 import * as MediaLibrary from "expo-media-library";
-import { Alert, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-root-toast";
 import CustomAlert from "../CustomAlert";
 import TextIcon from "../assets/blacktext.svg";
 import WhiteText from "../assets/text.svg";
-import UploadIcon from "../assets/gallery.svg";
 import CopyIcon from "../assets/copyWhite.svg";
 import FavIcon from "../assets/heartWhite.svg";
 import ShareIcon from "../assets/shareWhite.svg";
@@ -37,7 +35,6 @@ const CARD_WIDTH = SCREEN_WIDTH - 10;
 const CARD_HEIGHT = SCREEN_HEIGHT * 0.65;
 
 export default function ShayariCardExact({ route }) {
-  const navigation = useNavigation();
   const [fontSize, setFontSize] = useState(23);
   const [opacity, setOpacity] = useState(0.9);
   const [fontFamily, setFontFamily] = useState("Kameron_600SemiBold");
@@ -115,22 +112,18 @@ export default function ShayariCardExact({ route }) {
     { id: "6", name: "Font align", iconName: "align-center", type: "icon" },
   ];
   const fonts = [
-    { name: "Hind_600SemiBold", label: "Hindi" },
-    { name: "Baloo2_600SemiBold", label: "Baloo" },
-    { name: "Rajdhani_600SemiBold", label: "Rajdhani" },
-    { name: "TiroDevanagariHindi_400Regular", label: "TiroDevanagar" },
-    { name: "Yantramanav_400Regular", label: "Yantramanav" },
-
     { name: "serif", label: "Serif" }, // system font
     { name: "monospace", label: "Monospace" }, // system font
     { name: "sans-serif", label: "Sans-serif" }, // system font
     { name: "Manrope_600SemiBold", label: "Manrope" },
     { name: "Kameron_600SemiBold", label: "Kameron" },
-    // { name: "Pacifico_600SemiBold", label: "Pacifico" },
-    // { name: "Lobster_600SemiBold", label: "Lobster" },
-    // { name: "PlayfairDisplay_600SemiBold", label: "Playfair" },
-
-    // { name: "Raleway_600SemiBold", label: "Raleway" },
+    { name: "sans-serif", label: " Sans Serif" },
+    { name: "sans-serif-light", label: "Sans Serif Light" },
+    { name: "sans-serif-medium", label: "Sans Serif Medium" },
+    { name: "sans-serif-black", label: "Sans Serif Black" },
+    { name: "sans-serif-condensed", label: "Sans Serif Condensed" },
+    { name: "cursive", label: "Cursive" },
+    { name: "casual", label: "Casual" },
   ];
 
   const handleItemPress = (itemName) => {

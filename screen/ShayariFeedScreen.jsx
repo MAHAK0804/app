@@ -29,7 +29,6 @@ import TickIcon from "../assets/tick.svg";
 import LikedIcon from "../assets/heartfill.svg";
 const CARD_WIDTH = Dimensions.get("screen").width - 20;
 const CARD_HEIGHT = Dimensions.get("screen").height - 550;
-const CARD_MARGINVERTICAL = CARD_HEIGHT - 100;
 const ICON_BAR_HEIGHT = 58;
 
 const bgColors = ["#364149", "#ffffff", "#393649", "#493645", "#213550"];

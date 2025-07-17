@@ -146,20 +146,6 @@ export default function ShayariFullViewScreen({ route }) {
 
   return (
     <View style={styles.container}>
-      {/* {customAlertVisible && (
-        <View style={styles.alertOverlay}>
-          <View style={styles.alertBox}>
-            <Text style={styles.alertTitle}>{alertTitle}</Text>
-            <Text style={styles.alertMessage}>{alertMessage}</Text>
-            <TouchableOpacity
-              onPress={() => setCustomAlertVisible(false)}
-              style={styles.alertButton}
-            >
-              <Text style={styles.alertButtonText}>OK</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )} */}
       <CustomAlert
         visible={customAlertVisible}
         title={alertTitle}
@@ -189,11 +175,6 @@ export default function ShayariFullViewScreen({ route }) {
         style={styles.actionBar}
       >
         <TouchableOpacity onPress={() => handleCopy(route.params.shayari)}>
-          {/* <Ionicons
-            name={isCopied ? "checkmark-done-outline" : "copy-outline"}
-            size={22}
-            color={isCopied ? "green" : "#fff"}
-          /> */}
           {isCopied ? (
             <TickIcon width={22} height={20} fill="#000" />
           ) : (
@@ -204,16 +185,10 @@ export default function ShayariFullViewScreen({ route }) {
           <EditIcon width={22} height={20} fill="#fff" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleShare(route.params.shayari)}>
-          {/* <Ionicons name="share-social-outline" size={22} color="#fff" /> */}
           <ShareIcon width={22} height={20} fill="#000" />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => toggleFavorite(route.params.shayari)}>
-          {/* <Ionicons
-            name={isFav ? "heart" : "heart-outline"}
-            size={22}
-            color={isFav ? "#ff4444" : "#fff"}
-          /> */}
           {isFav ? (
             <LikedIcon width={22} height={20} fill="#000" />
           ) : (
@@ -377,48 +352,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "600",
-  },
-  alertOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 9999,
-  },
-  alertBox: {
-    width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 25,
-    alignItems: "center",
-    elevation: 10,
-  },
-  alertTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#222",
-    textAlign: "center",
-  },
-  alertMessage: {
-    fontSize: 15,
-    color: "#555",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  alertButton: {
-    backgroundColor: "#08448A",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  alertButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });

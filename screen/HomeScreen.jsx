@@ -23,11 +23,9 @@ import { useTheme } from "../ThemeContext";
 import axios from "axios";
 import ShayariSpotlightSlider from "../SpotlightShayariSlider";
 const PostSlider = React.lazy(() => import("../PostSlider"));
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import ShayariFeedScreen from "./ShayariFeedScreen";
 import { AuthContext } from "../AuthContext";
 import SvgImageWithFallback from "../SvgImage";
-import WritePencil from "../assets/pencil 2 (1).svg";
 import AllShayari from "../assets/allshayariicon.svg";
 import MyShayari from "../assets/myshayariicon.svg";
 import Fav from "../assets/favouriteicon.svg";
@@ -44,9 +42,7 @@ const HomeScreen = () => {
   const [showAll, setShowAll] = useState(false);
   const [spotlightShayaris, setSpotlightShayaris] = useState([]);
   const [loading, setLoading] = useState(true);
-  // const [isLogin, setIsLogin] = useState(false);
   const { userId, isLogin } = useContext(AuthContext);
-  console.log("userId", userId);
 
   const getSpotlightShayaris = useCallback(async () => {
     try {
@@ -73,16 +69,6 @@ const HomeScreen = () => {
     }
   }, []);
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const checkLogin = async () => {
-  //       const val = await AsyncStorage.getItem("IsLogin");
-  //       setIsLogin(val === "true");
-  //     };
-  //     checkLogin();
-  //   }, [])
-  // );
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -91,10 +77,6 @@ const HomeScreen = () => {
     };
     fetchData();
   }, [getAllCategories, getSpotlightShayaris]);
-
-  const toggleShowAll = useCallback(() => {
-    setShowAll((prev) => !prev);
-  }, []);
 
   const quickLinks = useMemo(
     () => [
@@ -156,7 +138,6 @@ const HomeScreen = () => {
       </View>
     );
   }
-  console.log(theme.background);
 
   return (
     <ScrollView style={{ backgroundColor: theme.background, flex: 1 }}>
@@ -171,7 +152,7 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
         <FlatList
-          data={showAll ? categories : categories.slice(0, 9)}
+          data={categories.slice(0, 9)}
           contentContainerStyle={styles.gridContent}
           keyExtractor={(item) => item._id}
           numColumns={numColumns}
@@ -202,9 +183,6 @@ const HomeScreen = () => {
               style={styles.pencilIcon}
             />
           </View>
-          {/* <View style={styles.iconWrapper}>
-            <WritePencil />
-          </View> */}
 
           <View style={{ marginLeft: 12 }}>
             <Text
@@ -220,10 +198,6 @@ const HomeScreen = () => {
 
       {/* Contest Section */}
       <View style={styles.contestBox}>
-        {/* <Image
-          source={require("../assets/fortune-wheel 2.png")}
-          style={styles.contestIcon}
-        /> */}
         <WheelSpin />
         <View>
           <Text style={styles.contestHeading}>Spin The Wheel</Text>
@@ -272,7 +246,6 @@ const HomeScreen = () => {
                 <item.icon width={28} height={28} />
               </View>
 
-              {/* <Image source={item.icon} style={styles.quickIcon} /> */}
               <Text style={[styles.quickText, { color: theme.text }]}>
                 {item.title}
               </Text>
@@ -305,10 +278,6 @@ const FONTSIZE = Dimensions.get("screen").fontScale;
 const WIDTH = Dimensions.get("screen").width;
 const PADDINGHORIZONTAL = Dimensions.get("screen").scale;
 const HEIGHT = Dimensions.get("screen").height;
-console.log("fontsize->>>>", FONTSIZE);
-console.log("width->>>>", WIDTH);
-console.log("height->>>>", HEIGHT);
-console.log("scale->>>>", PADDINGHORIZONTAL);
 
 const styles = StyleSheet.create({
   loadingContainer: {
@@ -429,12 +398,6 @@ const styles = StyleSheet.create({
     fontFamily: "Kameron_600SemiBold",
   },
 
-  toggleBtn: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 10,
-  },
   contestBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -445,11 +408,7 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 10,
   },
-  contestIcon: {
-    width: 116,
-    height: 116,
-    resizeMode: "contain",
-  },
+
   contestText: {
     color: "#fff",
     fontSize: FONTSIZE + 16,
@@ -499,28 +458,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     marginHorizontal: 20,
     opacity: 0.1,
-  },
-  postsHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  postsTitle: {
-    fontSize: FONTSIZE + 17,
-    fontWeight: "bold",
-  },
-  postCard: {
-    width: 250,
-    padding: 16,
-    borderRadius: 12,
-    marginRight: 10,
-  },
-  postText: {
-    fontSize: FONTSIZE + 13,
-    marginBottom: 12,
-  },
-  actionRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
   },
 });

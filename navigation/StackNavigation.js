@@ -6,17 +6,12 @@ import { useTheme } from "../ThemeContext";
 import CustomDrawerContent from "../CustomDrawerContent";
 import HomeScreen from "../screen/HomeScreen";
 import { NavigationContainer } from "@react-navigation/native";
-import ShayariScreen from "../screen/ShayariByCategory";
 import ShayariFullViewScreen from "../screen/ShayariFullViewScreen";
 import ShayariEditScreen from "../screen/ShayariEditScreen";
 import { useNavigation } from "@react-navigation/native";
-import AllCategories from "../screen/AllCategories";
-import WheelSpinnerGame from "../screen/WheelSpinnerGame";
 import WriteShayari from "../screen/WriteShayari";
 import LoginScreen from "../screen/LoginScreen";
 import VerifyOTPScreen from "../screen/VerifyOtpScreen";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
 import ShayariListScreen from "../screen/ShayariByCategory";
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
@@ -114,25 +109,6 @@ function HomeStack({ navigation }) {
         component={ShayariEditScreen}
         options={{
           header: () => <CustomEditHeader theme={theme} title="Edit" />,
-        }}
-      />
-      <Stack.Screen
-        name="AllCategories"
-        component={AllCategories}
-        options={{
-          header: () => (
-            <CustomEditHeader theme={theme} title="All Categories" />
-          ),
-        }}
-      />
-
-      <Stack.Screen
-        name="WheelGame"
-        component={WheelSpinnerGame}
-        options={{
-          header: () => (
-            <CustomEditHeader theme={theme} title="Play the game" />
-          ),
         }}
       />
 

@@ -63,10 +63,7 @@ export default function WriteShayari({ route }) {
   const [favorites, setFavorites] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
   const cardRef = useRef(null);
-  const [showforSave, setshowforSave] = useState(false);
   const [backgroundColor, setBackgroundColor] = useState(null);
-  const [showBgPicker, setShowBgPicker] = useState(false);
-  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
   const [textAlign, setTextAlign] = useState("center");
   const [customAlertVisible, setCustomAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
@@ -116,59 +113,6 @@ export default function WriteShayari({ route }) {
     setSelectedCardRef(cardRef);
     setCustomShareModalVisible(true);
   }, [shayariText]);
-  // const handleEdit = useCallback(
-  //   (item) => {
-  //     navigation.navigate("HomeStack", {
-  //       screen: "ShayariEditScreen",
-  //       params: { shayari: item },
-  //     });
-  //   },
-  //   [navigation]
-  // );
-
-  const pickImageFromGallery = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permissionResult.granted) {
-      alert("Permission to access gallery is required!");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const selectedImage = { uri: result.assets[0].uri };
-      setBackgroundImage(selectedImage);
-      setBackgroundColor(null);
-      setShowBgPicker(false);
-    }
-  };
-
-  const menuItems = [
-    { id: "1", name: "Fonts", iconName: "type", type: "image" },
-    { id: "2", name: "Styles", iconName: "italic", type: "icon" },
-    { id: "3", name: "Font color", type: "color", color: "#08448A" },
-    { id: "4", name: "Background", type: "background", iconName: "image" },
-    { id: "5", name: "Background color", type: "color", color: "#FF8B8B" },
-    { id: "6", name: "Font align", iconName: "align-center", type: "icon" },
-  ];
-
-  const fonts = [
-    { name: "serif", label: "Serif" },
-    { name: "monospace", label: "Monospace" },
-    { name: "sans-serif", label: "Sans-serif" },
-    { name: "Manrope_400Regular", label: "Manrope" },
-    { name: "Kameron_400Regular", label: "Kameron" },
-    { name: "Pacifico_400Regular", label: "Pacifico" },
-    { name: "Lobster_400Regular", label: "Lobster" },
-    { name: "PlayfairDisplay_400Regular", label: "Playfair" },
-    { name: "Raleway_400Regular", label: "Raleway" },
-  ];
 
   const loadFavorites = async () => {
     try {
@@ -503,9 +447,6 @@ export default function WriteShayari({ route }) {
             )}
           </TouchableOpacity>
 
-          {/* <TouchableOpacity onPress={() => handleEdit(shayariText)}>
-            <EditIcon width={22} height={20} fill="#fff" />
-          </TouchableOpacity> */}
           <TouchableOpacity onPress={handleShare}>
             <ShareIcon width={22} height={20} fill="#000" />
           </TouchableOpacity>
@@ -574,23 +515,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  sliderCard: {
-    height: "100%",
-    width: 60,
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 5,
-  },
-  sliderColumn: {
-    height: "10%",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  verticalSlider: {
-    transform: [{ rotate: "-90deg" }],
-    width: 220,
-    height: 40,
-  },
+
   textWrapper: {
     flex: 1,
     justifyContent: "center",
@@ -614,155 +539,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
   },
-  gridContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    maxWidth: 400,
-  },
-  gridItem: {
-    width: (width - 40) / 4,
-    aspectRatio: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    margin: 5,
-  },
-  iconWrapper: {
-    width: 62,
-    height: 52,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: "#262237",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    marginBottom: 8,
-    overflow: "hidden",
-  },
-  colorBox: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 15,
-  },
-  backgroundPreview: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
-  },
-  itemText: {
-    fontSize: 13,
-    color: "#fff",
-    textAlign: "center",
-  },
-  fontScrollViewAbsolute: {
-    position: "absolute",
-    bottom: 10,
-    left: 0,
-    right: 0,
-    height: 70,
-    borderRadius: 10,
-    paddingVertical: 5,
-  },
-  fontScrollViewContent: {
-    alignItems: "center",
-    paddingHorizontal: 5,
-  },
-  fontItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  fontItemSelected: {
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  styleOptionsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 10,
-    backgroundColor: "#f1f1f1",
-    paddingVertical: 5,
-  },
-  colorPickerContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 300,
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  bgPickerContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 10,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  bgImageOption: {
-    marginRight: 10,
-    borderRadius: 10,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: "#ccc",
-  },
-  bgImageOption2: {
-    marginRight: 10,
-    borderRadius: 10,
-    overflow: "hidden",
-    width: 80,
-    height: 80,
-  },
-  alertOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 9999,
-  },
-  alertBox: {
-    width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-    elevation: 10,
-  },
-  alertTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#222",
-    textAlign: "center",
-  },
-  alertMessage: {
-    fontSize: 15,
-    color: "#555",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  alertButton: {
-    backgroundColor: "#08448A",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  alertButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+
   modalOverlay: {
     position: "absolute",
     top: 0,

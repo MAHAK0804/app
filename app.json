@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/apdativelogo.png",
+        "foregroundImage": "./assets/applogo.png",
         "backgroundColor": "#08041C"
       },
       "edgeToEdgeEnabled": true,
@@ -26,9 +26,7 @@
     "web": {
       "favicon": "./assets/applogo.png"
     },
-    "plugins": [
-      "expo-font"
-    ],
+    "plugins": ["expo-font"],
     "extra": {
       "eas": {
         "projectId": "0a5cb4c8-8742-4120-bfff-5e8fdb4f1cae"
