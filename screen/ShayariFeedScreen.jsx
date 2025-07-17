@@ -1,0 +1,447 @@
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+  Share,
+  Image,
+  Modal,
+  Dimensions,
+} from "react-native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import axios from "axios";
+import Toast from "react-native-root-toast";
+import { captureRef } from "react-native-view-shot";
+import * as Clipboard from "expo-clipboard";
+import * as Sharing from "expo-sharing";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as MediaLibrary from "expo-media-library";
+import EditIcon from "../assets/whiteedit.svg";
+import TextIcon from "../assets/text.svg";
+import CopyIcon from "../assets/copyWhite.svg";
+import FavIcon from "../assets/heartWhite.svg";
+import ShareIcon from "../assets/shareWhite.svg";
+import TickIcon from "../assets/tick.svg";
+import LikedIcon from "../assets/heartfill.svg";
+const CARD_WIDTH = Dimensions.get("screen").width - 20;
+const CARD_HEIGHT = Dimensions.get("screen").height - 550;
+const CARD_MARGINVERTICAL = CARD_HEIGHT - 100;
+const ICON_BAR_HEIGHT = 58;
+
+const bgColors = ["#364149", "#ffffff", "#393649", "#493645", "#213550"];
+
+export default function ShayariFeedScreen() {
+  const [data, setShayariList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [customShareModalVisible, setCustomShareModalVisible] = useState(false);
+  const [selectedShayari, setSelectedShayari] = useState(null);
+  const [selectedColors, setSelectedColors] = useState({
+    bg: "#fff",
+    inner: "#fff",
+  });
+  const navigation = useNavigation();
+  const [favorites, setFavorites] = useState([]);
+  const [copiedId, setCopiedId] = useState(null);
+
+  const captureViewRef = useRef();
+
+  const loadFavorites = async () => {
+    try {
+      const stored = await AsyncStorage.getItem("favorites");
+      setFavorites(stored ? JSON.parse(stored) : []);
+    } catch (e) {
+      console.log("Failed to load favorites", e);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadFavorites();
+    }, [])
+  );
+
+  const saveFavorites = async (updatedFavorites) => {
+    try {
+      await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+      setFavorites(updatedFavorites);
+    } catch (error) {
+      console.log("Failed to save favorites", error);
+    }
+  };
+
+  const toggleFavorite = useCallback(
+    (shayari) => {
+      const isFav = favorites.some((item) => item._id === shayari._id);
+      const updated = isFav
+        ? favorites.filter((item) => item._id !== shayari._id)
+        : [...favorites, shayari];
+
+      saveFavorites(updated);
+
+      Toast.show(isFav ? "Removed from Favorites" : "Added to Favorites", {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+      });
+    },
+    [favorites]
+  );
+
+  const handleCopy = useCallback((item) => {
+    const formattedText = item.text?.replace(/\\n/g, "\n") || "";
+    Clipboard.setStringAsync(formattedText);
+    setCopiedId(item._id);
+    Toast.show("Copied to clipboard!", {
+      duration: Toast.durations.SHORT,
+      position: Toast.positions.BOTTOM,
+    });
+    setTimeout(() => setCopiedId(null), 2000);
+  }, []);
+
+  const handleShare = useCallback((item, _, index) => {
+    const bg = bgColors[index % bgColors.length];
+    setSelectedShayari(item);
+    setSelectedColors({ bg });
+    setCustomShareModalVisible(true);
+  }, []);
+
+  const shareAsImage = async () => {
+    if (!captureViewRef.current) return;
+
+    try {
+      const uri = await captureRef(captureViewRef.current, {
+        format: "png",
+        quality: 1,
+      });
+
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        await Sharing.shareAsync(uri, {
+          mimeType: "image/png",
+          dialogTitle: "Share Shayari Image",
+        });
+      } else {
+        Toast.show("Sharing not available.");
+      }
+    } catch (error) {
+      console.error("Error sharing as image:", error);
+      Toast.show("Failed to share as image.");
+    } finally {
+      setCustomShareModalVisible(false);
+    }
+  };
+
+  const saveToGallery = async () => {
+    if (!captureViewRef.current) return;
+
+    try {
+      const permission = await MediaLibrary.requestPermissionsAsync();
+      if (!permission.granted) {
+        alert("Permission Required", "Please allow access to save images.");
+        return;
+      }
+
+      const uri = await captureRef(captureViewRef.current, {
+        format: "png",
+        quality: 1,
+      });
+
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      await MediaLibrary.createAlbumAsync("Shayari", asset, false);
+
+      Toast.show("Saved to gallery!", {
+        duration: Toast.durations.SHORT,
+      });
+    } catch (error) {
+      console.error("Save Error:", error);
+      alert("Error", "Failed to save image.");
+    } finally {
+      setCustomShareModalVisible(false);
+    }
+  };
+
+  const fetchShayaris = async () => {
+    try {
+      const res = await axios.get(
+        "https://hindishayari.onrender.com/api/shayaris/"
+      );
+      const shuffled = res.data.sort(() => 0.5 - Math.random());
+      setShayariList(shuffled);
+    } catch (error) {
+      console.log("Error fetching shayaris ->", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchShayaris();
+  }, []);
+  const handleEdit = useCallback(
+    (item) => {
+      navigation.navigate("HomeStack", {
+        screen: "ShayariEditScreen",
+        params: { shayari: item },
+      });
+    },
+    [navigation]
+  );
+  const ShayariCard = ({ item, index, onCopy, onFavorite, onShare }) => {
+    const backgroundColor = bgColors[index % bgColors.length];
+    // const innerBackground = innerBg[index % innerBg.length];
+    const textColor = backgroundColor === "#ffffff" ? "#111" : "#fff";
+    const isFavorite = favorites.some((fav) => fav._id === item._id);
+    const isCopied = copiedId === item._id;
+
+    return (
+      <View style={[styles.card, { backgroundColor }]}>
+        <View style={styles.textWrapper}>
+          <Text style={[styles.text, { color: textColor }]}>
+            {item.text.replace(/\\n/g, "\n")}
+          </Text>
+        </View>
+
+        <View style={styles.iconBar}>
+          <TouchableOpacity onPress={() => onCopy(item)}>
+            {isCopied ? (
+              <TickIcon width={22} height={20} fill="#000" />
+            ) : (
+              <CopyIcon width={22} height={20} fill="#000" />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleEdit(item)}>
+            <EditIcon width={22} height={20} fill="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onFavorite(item)}>
+            {isFavorite ? (
+              <LikedIcon width={22} height={20} fill="#000" />
+            ) : (
+              <FavIcon width={22} height={20} fill="#000" />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onShare(item, null, index)}>
+            <ShareIcon width={22} height={20} fill="#000" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.list, { justifyContent: "center", flex: 1 }]}>
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <FlatList
+        data={data}
+        keyExtractor={(item, index) => item._id || index.toString()}
+        contentContainerStyle={styles.list}
+        renderItem={({ item, index }) => (
+          <ShayariCard
+            item={item}
+            index={index}
+            onCopy={handleCopy}
+            onFavorite={toggleFavorite}
+            onShare={handleShare}
+          />
+        )}
+      />
+
+      {customShareModalVisible && (
+        <Modal visible={true} transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setCustomShareModalVisible(false)}
+              >
+                <Ionicons name="close" size={22} color="#333" />
+              </TouchableOpacity>
+
+              {/* HIDDEN VIEW TO CAPTURE */}
+              <View
+                style={{ position: "absolute", top: -9999, left: -9999 }}
+                ref={captureViewRef}
+                collapsable={false}
+              >
+                <View
+                  style={[
+                    styles.card,
+                    {
+                      backgroundColor: selectedColors.bg,
+                      justifyContent: "center",
+                      padding: 20,
+                      height: CARD_HEIGHT,
+                      width: CARD_WIDTH - 13,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.text,
+                      {
+                        color:
+                          selectedColors.bg === "#ffffff" ? "#111" : "#fff",
+                      },
+                    ]}
+                  >
+                    {selectedShayari?.text.replace(/\\n/g, "\n")}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.previewBox} />
+
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[styles.shareButton, { gap: 7 }]}
+                  onPress={() => {
+                    Share.share({
+                      message: selectedShayari?.text.replace(/\\n/g, "\n"),
+                    });
+                    setCustomShareModalVisible(false);
+                  }}
+                >
+                  <TextIcon width={22} height={20} fill="#000" />
+                  <Text style={styles.shareButtonText}>Share Text</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.shareButton}
+                  onPress={shareAsImage}
+                >
+                  <Ionicons
+                    name="image-outline"
+                    size={18}
+                    color="#fff"
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.shareButtonText}>Share Image</Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                style={{
+                  margin: 10,
+                  padding: 10,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#19173D",
+                  borderRadius: 30,
+                  width: "100%",
+                  justifyContent: "center",
+                }}
+                onPress={saveToGallery}
+              >
+                <Ionicons
+                  name="download-outline"
+                  size={18}
+                  color="#fff"
+                  style={{ marginRight: 6 }}
+                />
+                <Text style={styles.shareButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
+    </>
+  );
+}
+const FONTSIZE = Dimensions.get("screen").fontScale;
+
+const styles = StyleSheet.create({
+  list: {
+    alignItems: "center",
+    paddingVertical: 10,
+    marginHorizontal: 10,
+  },
+  card: {
+    width: CARD_WIDTH - 13,
+    height: CARD_HEIGHT,
+    borderRadius: 16,
+    marginVertical: 10,
+    justifyContent: "space-between",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  textWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+
+  text: {
+    fontSize: FONTSIZE + 22,
+    lineHeight: 28,
+    textAlign: "center",
+    fontFamily: "Kameron_500Medium",
+  },
+  iconBar: {
+    height: ICON_BAR_HEIGHT,
+    width: "100%",
+    backgroundColor: "#15202C",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 50,
+    PaddingHorizontal: 20,
+  },
+  modalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    width: "90%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    alignItems: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 7,
+    right: 8,
+    padding: 6,
+  },
+  previewBox: {
+    width: "100%",
+    height: 160,
+    backgroundColor: "#eee",
+    borderRadius: 8,
+    marginVertical: 10,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+  },
+  shareButton: {
+    backgroundColor: "#19173D",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 6,
+  },
+  shareButtonText: {
+    color: "#fff",
+    fontSize: 14,
+  },
+});

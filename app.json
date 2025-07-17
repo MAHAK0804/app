@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Hindi Shayari Lok",
+    "slug": "HindiShayari",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/applogo.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splashlogo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#08041C"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "icon": "./assets/applogo.png"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/apdativelogo.png",
+        "backgroundColor": "#08041C"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.mahakasde.HindiShayari"
+    },
+    "web": {
+      "favicon": "./assets/applogo.png"
+    },
+    "plugins": [
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0a5cb4c8-8742-4120-bfff-5e8fdb4f1cae"
+      }
+    }
+  }
+}
