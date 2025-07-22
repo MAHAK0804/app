@@ -1,4 +1,10 @@
-import React, { useRef, useMemo } from "react";
+import React, {
+  useRef,
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import {
   View,
   Text,
@@ -7,41 +13,108 @@ import {
   Dimensions,
   StyleSheet,
   Animated,
+  PixelRatio,
 } from "react-native";
+import { moderateScale, scale, scaleFont, verticalScale } from "./Responsive";
+import ShayariCardActions from "./Action";
+import CustomShareModal from "./CustomShareModal";
 
 const { width } = Dimensions.get("window");
 
-export default function ShayariSpotlightSlider({ data = [] }) {
+export default function ShayariSpotlightSlider({
+  data = [],
+  fetchNewShayaris,
+}) {
   const scrollX = useRef(new Animated.Value(0)).current;
+  const flatListRef = useRef(null);
+  const cardRefs = useRef({});
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [latestShayaris, setLatestShayaris] = useState(data.slice(0, 3));
+  const [customShareModalVisible, setCustomShareModalVisible] = useState(false);
+  const [selectedCardRef, setSelectedCardRef] = useState(null);
+  const [selectedShayari, setSelectedShayari] = useState(null);
 
-  const latestShayaris = useMemo(() => data.slice(0, 3), [data]);
+  const handleShare = useCallback((item, ref) => {
+    setSelectedShayari(item);
+    setSelectedCardRef(ref);
+    setCustomShareModalVisible(true);
+  }, []);
 
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Image
-        source={require("./assets/Rectangle 22.png")} // fallback static background
-        style={styles.bgImage}
-      />
-      <View style={styles.absoluteContent}>
-        <Text style={styles.title}>Shayari Spotlight</Text>
-        <Text style={styles.quote}>
-          {(item.text || "").replace(/\\n/g, "\n")}
-        </Text>
+  // Fetch new random shayaris
+  const refreshShayaris = useCallback(async () => {
+    try {
+      if (typeof fetchNewShayaris === "function") {
+        const newData = await fetchNewShayaris();
+        const shuffled = newData.sort(() => 0.5 - Math.random());
+        const topThree = shuffled.slice(0, 3);
+        setLatestShayaris(topThree);
+        setCurrentIndex(0);
+        flatListRef.current?.scrollToIndex({ index: 0, animated: false });
+      }
+    } catch (err) {
+      console.error("Error fetching new shayaris:", err);
+    }
+  }, [fetchNewShayaris]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nextIndex = currentIndex + 1;
+
+      if (nextIndex < latestShayaris.length) {
+        setCurrentIndex(nextIndex);
+        flatListRef.current?.scrollToIndex({
+          index: nextIndex,
+          animated: true,
+        });
+      } else {
+        refreshShayaris(); // After last card, fetch new random
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex, latestShayaris.length, refreshShayaris]);
+
+  const renderItem = ({ item }) => {
+    const currentRef = cardRefs.current[item._id] || React.createRef();
+    cardRefs.current[item._id] = currentRef;
+
+    return (
+      <View style={styles.card}>
+        <Image
+          source={require("./assets/Rectangle 22.png")}
+          style={styles.bgImage}
+        />
+        <View style={styles.absoluteContent}>
+          <Text style={styles.title}>Shayari Spotlight</Text>
+          <View style={styles.captureArea} collapsable={false} ref={currentRef}>
+            <Text style={styles.quote}>
+              {(item.text || "").replace(/\\n/g, "\n")}
+            </Text>
+          </View>
+          <View style={{ marginBottom: 11, marginRight: 12 }}>
+            <ShayariCardActions
+              title="SpotLight Shayaris"
+              shayari={item}
+              filteredShayaris={latestShayaris}
+              onShare={() => handleShare(item, currentRef)}
+              isSpotlightScreen={true}
+            />
+          </View>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   if (!latestShayaris.length) return null;
 
   return (
     <View>
       <Animated.FlatList
+        ref={flatListRef}
         data={latestShayaris}
         keyExtractor={(item) => item._id || item.id}
         horizontal
         pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        bounces={false}
         scrollEventThrottle={16}
         renderItem={renderItem}
         onScroll={Animated.event(
@@ -50,7 +123,6 @@ export default function ShayariSpotlightSlider({ data = [] }) {
         )}
         initialNumToRender={3}
         maxToRenderPerBatch={3}
-        windowSize={5}
       />
 
       {/* Pagination Dots */}
@@ -72,23 +144,43 @@ export default function ShayariSpotlightSlider({ data = [] }) {
           );
         })}
       </View>
+
+      <CustomShareModal
+        visible={customShareModalVisible}
+        onClose={() => setCustomShareModalVisible(false)}
+        cardRef={selectedCardRef}
+        shayari={selectedShayari}
+      />
     </View>
   );
 }
+const fontScale = PixelRatio.getFontScale(); // Usually 1.0, 1.2, 1.5, etc.
+const baseFontSize = scaleFont(21); // You already use this as base
+const dynamicFontSize = baseFontSize * fontScale;
+const dynamicCardHeight = dynamicFontSize * 9.6;
 
 const styles = StyleSheet.create({
   card: {
-    width: width - 30,
-    height: 215,
+    width: scale(350),
+    // height: dynamicCardHeight,
+    minHeight: dynamicCardHeight,
     borderRadius: 18,
-    overflow: "hidden",
-    marginBottom: 10,
-    marginHorizontal: 20,
+    // overflow: "hidden",
+    // marginBottom: 10,
+    marginHorizontal: 15,
   },
   bgImage: {
     ...StyleSheet.absoluteFillObject,
     resizeMode: "cover",
     borderRadius: 15,
+    width: "100%",
+    height: "100%",
+  },
+  captureArea: {
+    flex: 1,
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
   },
   absoluteContent: {
     flex: 1,
@@ -97,18 +189,18 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   title: {
-    fontSize: 23,
+    fontSize: fontScale * scaleFont(20),
     color: "#fff",
-    marginBottom: 50,
+    marginBottom: 20,
     fontFamily: "Kameron_500Medium",
   },
   quote: {
-    fontSize: 21,
+    fontSize: dynamicFontSize,
     color: "#fff",
-    fontWeight: "500",
-    lineHeight: 26,
+    lineHeight: dynamicFontSize * 1.4,
     textAlign: "center",
     fontFamily: "Kameron_500Medium",
+    marginHorizontal: moderateScale(15),
   },
   pagination: {
     flexDirection: "row",

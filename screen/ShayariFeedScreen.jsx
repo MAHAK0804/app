@@ -27,6 +27,10 @@ import FavIcon from "../assets/heartWhite.svg";
 import ShareIcon from "../assets/shareWhite.svg";
 import TickIcon from "../assets/tick.svg";
 import LikedIcon from "../assets/heartfill.svg";
+import { fontScale, moderateScale, scale, scaleFont } from "../Responsive";
+import Gallery from "../assets/gallery.svg";
+import DownloadGallery from "../assets/Download.svg";
+import CrossXMark from "../assets/cross-circle 1.svg";
 const CARD_WIDTH = Dimensions.get("screen").width - 20;
 const CARD_HEIGHT = Dimensions.get("screen").height - 550;
 const ICON_BAR_HEIGHT = 58;
@@ -253,7 +257,6 @@ export default function ShayariFeedScreen() {
           />
         )}
       />
-
       {customShareModalVisible && (
         <Modal visible={true} transparent animationType="fade">
           <View style={styles.modalOverlay}>
@@ -262,7 +265,7 @@ export default function ShayariFeedScreen() {
                 style={styles.closeButton}
                 onPress={() => setCustomShareModalVisible(false)}
               >
-                <Ionicons name="close" size={22} color="#333" />
+                <CrossXMark width={22} height={20} fill="#000" />
               </TouchableOpacity>
 
               {/* HIDDEN VIEW TO CAPTURE */}
@@ -314,38 +317,19 @@ export default function ShayariFeedScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.shareButton}
+                  style={[styles.shareButton, { gap: 7 }]}
                   onPress={shareAsImage}
                 >
-                  <Ionicons
-                    name="image-outline"
-                    size={18}
-                    color="#fff"
-                    style={{ marginRight: 6 }}
-                  />
+                  <Gallery width={22} height={20} fill="#000" />
                   <Text style={styles.shareButtonText}>Share Image</Text>
                 </TouchableOpacity>
               </View>
 
               <TouchableOpacity
-                style={{
-                  margin: 10,
-                  padding: 10,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  backgroundColor: "#19173D",
-                  borderRadius: 30,
-                  width: "100%",
-                  justifyContent: "center",
-                }}
+                style={[styles.saveButton, { gap: 7 }]}
                 onPress={saveToGallery}
               >
-                <Ionicons
-                  name="download-outline"
-                  size={18}
-                  color="#fff"
-                  style={{ marginRight: 6 }}
-                />
+                <DownloadGallery width={22} height={20} fill="#000" />
                 <Text style={styles.shareButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
@@ -362,6 +346,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
     marginHorizontal: 10,
+    marginBottom: moderateScale(25),
   },
   card: {
     width: CARD_WIDTH - 13,
@@ -380,8 +365,8 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    fontSize: FONTSIZE + 22,
-    lineHeight: 28,
+    fontSize: fontScale * scaleFont(22),
+    lineHeight: fontScale * scaleFont(22) * 1.4,
     textAlign: "center",
     fontFamily: "Kameron_500Medium",
   },
@@ -401,46 +386,68 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 999,
   },
   modalBox: {
-    width: "90%",
+    width: 300,
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 20,
+    paddingTop: 30,
     alignItems: "center",
+    position: "relative",
+    marginHorizontal: moderateScale(50),
   },
   closeButton: {
     position: "absolute",
-    top: 7,
-    right: 8,
+    top: 4,
+    right: 10,
     padding: 6,
+    zIndex: 10,
   },
   previewBox: {
-    width: "100%",
-    height: 160,
-    backgroundColor: "#eee",
-    borderRadius: 8,
-    marginVertical: 10,
+    width: 250,
+    height: 140,
+    backgroundColor: "#ddd",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 20,
   },
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
+    justifyContent: "space-between",
+    // width: "100%",
   },
   shareButton: {
-    backgroundColor: "#19173D",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10,
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: 6,
+    backgroundColor: "#19173D",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 30,
+    marginHorizontal: 4,
+    flex: 1,
+    justifyContent: "center",
+  },
+  saveButton: {
+    margin: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#19173D",
+    borderRadius: 30,
+    width: scale(210),
+    justifyContent: "center",
   },
   shareButtonText: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: fontScale * scaleFont(12),
+    // fontWeight: "600",
+    textAlign: "center",
   },
 });

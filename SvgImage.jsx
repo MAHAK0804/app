@@ -3,7 +3,7 @@ import { Image, View, StyleSheet, ActivityIndicator } from "react-native";
 import { SvgXml } from "react-native-svg";
 import axios from "axios";
 
-const SvgImageWithFallback = ({ uri, size = 44 }) => {
+const SvgImageWithFallback = ({ uri, size = 50 }) => {
   const [svgContent, setSvgContent] = useState(null);
   const [error, setError] = useState(false);
 
@@ -40,7 +40,7 @@ const SvgImageWithFallback = ({ uri, size = 44 }) => {
       <Image
         source={{ uri }}
         style={{ width: size, height: size }}
-        resizeMode="contain" // ✅ Prevents repeat/tiling
+        resizeMode="cover" // ✅ Prevents repeat/tiling
       />
     );
   }

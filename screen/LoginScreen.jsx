@@ -14,6 +14,7 @@ import {
   // CheckBox,
 } from "react-native";
 import * as Yup from "yup";
+import { fontScale, scaleFont } from "../Responsive";
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -102,7 +103,7 @@ export default function LoginScreen() {
             color: "#fff",
             paddingBottom: 10,
             fontFamily: "Manrope_600SemiBold",
-            fontSize: 16,
+            fontSize: fontScale * scaleFont(16),
           }}
         >
           Name
@@ -123,7 +124,7 @@ export default function LoginScreen() {
             color: "#fff",
             paddingBottom: 10,
             fontFamily: "Manrope_600SemiBold",
-            fontSize: 16,
+            fontSize: fontScale * scaleFont(16),
           }}
         >
           Phone no. / E-mail
@@ -170,9 +171,9 @@ const styles = StyleSheet.create({
   background: { flex: 1, backgroundColor: "#08041C" },
   container: { paddingHorizontal: 24, paddingVertical: 20 },
   backButton: { padding: 24 },
-  backIcon: { fontSize: 34, color: "#fff" },
+  backIcon: { fontSize: fontScale * scaleFont(34), color: "#fff" },
   title: {
-    fontSize: 30,
+    fontSize: fontScale * scaleFont(30),
     color: "#fff",
     marginBottom: 20,
     fontFamily: "Manrope_700Bold",
@@ -187,7 +188,7 @@ const styles = StyleSheet.create({
     color: "red",
     marginBottom: 10,
     marginLeft: 5,
-    fontSize: 12,
+    fontSize: fontScale * scaleFont(12),
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: fontScale * scaleFont(20),
     fontFamily: "Manrope_600SemiBold",
   },
   checkboxContainer: {
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     color: "#fff",
     marginLeft: 10,
-    fontSize: 14,
+    fontSize: fontScale * scaleFont(14),
     fontFamily: "Manrope_500Medium",
   },
 });

@@ -30,6 +30,7 @@ import AllShayari from "../assets/allshayariicon.svg";
 import MyShayari from "../assets/myshayariicon.svg";
 import Fav from "../assets/favouriteicon.svg";
 import WheelSpin from "../assets/wheelspin.svg";
+import { fontScale, moderateScale, scale, scaleFont } from "../Responsive";
 
 const { width } = Dimensions.get("screen");
 const numColumns = 3;
@@ -53,6 +54,7 @@ const HomeScreen = () => {
         .sort(() => 0.5 - Math.random())
         .slice(0, 3);
       setSpotlightShayaris(randomShayaris);
+      return randomShayaris;
     } catch (error) {
       console.error("Error fetching spotlight shayaris:", error);
     }
@@ -198,7 +200,9 @@ const HomeScreen = () => {
 
       {/* Contest Section */}
       <View style={styles.contestBox}>
-        <WheelSpin />
+        <View style={styles.wheelIconWrapper}>
+          <WheelSpin width={scale(116)} height={scale(116)} />
+        </View>
         <View>
           <Text style={styles.contestHeading}>Spin The Wheel</Text>
           <Text style={styles.contestText}>
@@ -208,22 +212,16 @@ const HomeScreen = () => {
             style={styles.playbtn}
             onPress={() => navigation.navigate("WheelGame")}
           >
-            <Text
-              style={{
-                color: "#fff",
-                fontFamily: "Kameron_700Bold",
-                fontSize: 14,
-                textAlign: "center",
-              }}
-            >
-              Play Now
-            </Text>
+            <Text style={styles.playbtnText}>Play now</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Spotlight Shayaris */}
-      <ShayariSpotlightSlider data={spotlightShayaris} />
+      <ShayariSpotlightSlider
+        data={spotlightShayaris}
+        fetchNewShayaris={getSpotlightShayaris}
+      />
 
       {/* Quick Links */}
       <View
@@ -243,7 +241,7 @@ const HomeScreen = () => {
               }
             >
               <View style={styles.quickIcon}>
-                <item.icon width={28} height={28} />
+                <item.icon width={scale(28)} height={scale(28)} />
               </View>
 
               <Text style={[styles.quickText, { color: theme.text }]}>
@@ -274,7 +272,6 @@ const HomeScreen = () => {
 };
 
 export default React.memo(HomeScreen);
-const FONTSIZE = Dimensions.get("screen").fontScale;
 const WIDTH = Dimensions.get("screen").width;
 const PADDINGHORIZONTAL = Dimensions.get("screen").scale;
 const HEIGHT = Dimensions.get("screen").height;
@@ -287,23 +284,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#1B1B1D",
   },
   section: {
-    paddingHorizontal: PADDINGHORIZONTAL + 4,
+    paddingHorizontal: moderateScale(4),
     paddingTop: 10,
   },
   titleHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 18,
-    marginBottom: 16,
+    paddingHorizontal: moderateScale(18),
+    marginBottom: moderateScale(16),
   },
   titleText: {
-    fontSize: FONTSIZE + 19,
+    fontSize: fontScale * scaleFont(19),
     color: "#fff",
     fontFamily: "Manrope_700Bold",
   },
   viewAll: {
     color: "#FFFFFF",
-    fontSize: FONTSIZE + 13,
+    fontSize: fontScale * scaleFont(13),
     fontFamily: "Manrope_500Medium",
   },
   cardWrapper: {
@@ -330,10 +327,10 @@ const styles = StyleSheet.create({
     width: iconSize,
     height: iconSize,
     borderRadius: 12,
-    marginBottom: 4,
+    marginBottom: moderateScale(4),
   },
   title: {
-    fontSize: FONTSIZE + 17,
+    fontSize: fontScale * scaleFont(17),
     fontWeight: "500",
     textAlign: "center",
     marginTop: 4,
@@ -341,19 +338,19 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_700Bold",
   },
   writeBox: {
-    marginHorizontal: 16,
-    marginTop: 20,
+    marginHorizontal: moderateScale(16),
+    marginTop: moderateScale(20),
     backgroundColor: "#1F2B35",
-    paddingVertical: PADDINGHORIZONTAL + 20,
-    paddingHorizontal: 2,
-    borderRadius: 16,
+    paddingVertical: moderateScale(20),
+    paddingHorizontal: moderateScale(2),
+    borderRadius: moderateScale(16),
     alignItems: "center",
   },
   writeHeading: {
     color: "#ffffff",
-    fontSize: FONTSIZE + 20,
+    fontSize: fontScale * scaleFont(20),
     textAlign: "center",
-    lineHeight: 30,
+    lineHeight: moderateScale(30),
     fontFamily: "Manrope_400Regular",
   },
   writeButton: {
@@ -361,10 +358,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: PADDINGHORIZONTAL + 10,
+    paddingVertical: moderateScale(10),
+    paddingHorizontal: moderateScale(10),
     width: WIDTH - 100,
-    marginVertical: 20,
+    marginVertical: moderateScale(20),
     borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
@@ -373,8 +370,8 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   iconWrapper: {
-    width: 40,
-    height: 40,
+    width: scale(40),
+    height: scale(40),
     backgroundColor: "#fff",
     borderRadius: 20,
     justifyContent: "center",
@@ -387,14 +384,14 @@ const styles = StyleSheet.create({
   },
 
   pencilIcon: {
-    width: 22,
-    height: 22,
+    width: scale(22),
+    height: scale(22),
     resizeMode: "contain",
   },
   buttonTitle: {
     textAlign: "center",
     color: "#000",
-    fontSize: FONTSIZE + 20,
+    fontSize: fontScale * scaleFont(16),
     fontFamily: "Kameron_600SemiBold",
   },
 
@@ -402,33 +399,47 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#2D457E",
-    marginHorizontal: PADDINGHORIZONTAL + 14,
-    marginVertical: 20,
+    marginHorizontal: moderateScale(14),
+    marginVertical: moderateScale(20),
     borderRadius: 16,
-    padding: 14,
+    padding: moderateScale(14),
     gap: 10,
   },
 
-  contestText: {
-    color: "#fff",
-    fontSize: FONTSIZE + 16,
-    lineHeight: FONTSIZE + 20,
-    fontFamily: "Kameron_400Regular",
-    marginVertical: 8,
+  wheelIconWrapper: {
+    width: scale(90),
+    height: scale(48),
+    justifyContent: "center",
+    alignItems: "center",
   },
+
   contestHeading: {
     color: "#fff",
-    fontSize: FONTSIZE + 19,
+    fontSize: fontScale * scaleFont(16),
     fontFamily: "Kameron_700Bold",
+  },
+  contestText: {
+    color: "#fff",
+    fontSize: fontScale * scaleFont(14),
+    lineHeight: fontScale * scaleFont(22),
+    fontFamily: "Kameron_400Regular",
+    marginVertical: 2,
   },
   playbtn: {
     backgroundColor: "#6784CA",
     borderRadius: 40,
-    padding: PADDINGHORIZONTAL + 10,
+    padding: moderateScale(10),
     color: "#fff",
     marginVertical: 5,
-    width: 120,
+    width: scale(120),
     elevation: 2,
+    textAlign: "center",
+  },
+  playbtnText: {
+    color: "#fff",
+    fontFamily: "Kameron_700Bold",
+    fontSize: fontScale * scaleFont(14),
+    textAlign: "center",
   },
 
   quickLinksContainer: {
@@ -444,13 +455,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   quickIcon: {
+    width: scale(30),
+    height: scale(28),
     marginRight: 16,
     justifyContent: "center",
     alignItems: "center",
   },
 
   quickText: {
-    fontSize: FONTSIZE + 17,
+    fontSize: fontScale * scaleFont(17),
     fontFamily: "Kameron_600SemiBold",
   },
   divider: {

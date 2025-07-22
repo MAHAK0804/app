@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Text,
   TouchableOpacity,
@@ -12,6 +12,7 @@ import {
   Alert,
   Dimensions,
   ImageBackground,
+  FlatList,
 } from "react-native";
 import Toast from "react-native-root-toast";
 import { captureRef } from "react-native-view-shot";
@@ -26,10 +27,13 @@ import ShareIcon from "../assets/shareWhite.svg";
 import TickIcon from "../assets/tick.svg";
 import LikedIcon from "../assets/heartfill.svg";
 import TextIcon from "../assets/text.svg";
+import ShayariCardActions from "../Action";
+import CustomShareModal from "../CustomShareModal";
+import { fontScale, scaleFont } from "../Responsive";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("screen");
 const CARD_WIDTH = SCREEN_WIDTH;
-const CARD_HEIGHT = SCREEN_HEIGHT - 120;
+const CARD_HEIGHT = SCREEN_HEIGHT - 140;
 
 export default function ShayariFullViewScreen({ route }) {
   const [favorites, setFavorites] = useState([]);
@@ -39,8 +43,9 @@ export default function ShayariFullViewScreen({ route }) {
   const [alertMessage, setAlertMessage] = useState("");
   const [customShareModalVisible, setCustomShareModalVisible] = useState(false);
   const [selectedShayari, setSelectedShayari] = useState(null);
+  const [shayaris, setShaayris] = useState("");
   const cardRef = useRef(null);
-  const shayari = route.params.shayari.text.replace(/\\n/g, "\n");
+  // const shayari = route.params.shayari.text.replace(/\\n/g, "\n");
   const navigation = useNavigation();
   const handleShare = useCallback((item) => {
     setSelectedShayari(item);
@@ -143,6 +148,29 @@ export default function ShayariFullViewScreen({ route }) {
     });
     setTimeout(() => setCopiedId(null), 2000);
   };
+  const { shayariList, initialIndex } = route.params;
+
+  const flatListRef = useRef(null);
+
+  useEffect(() => {
+    if (flatListRef.current && initialIndex >= 0) {
+      setTimeout(() => {
+        flatListRef.current.scrollToIndex({
+          index: initialIndex,
+          animated: false,
+        });
+      }, 100);
+    }
+  }, [initialIndex]);
+  const viewabilityConfig = {
+    viewAreaCoveragePercentThreshold: 80,
+  };
+
+  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+    if (viewableItems.length > 0) {
+      setShaayris(viewableItems[0].item);
+    }
+  });
 
   return (
     <View style={styles.container}>
@@ -155,7 +183,7 @@ export default function ShayariFullViewScreen({ route }) {
       <View style={styles.cardRow}>
         <View ref={cardRef} collapsable={false}>
           <ImageBackground
-            source={require("../assets/fullscreenpage.png")}
+            source={require("../assets/image_1.webp")}
             style={[
               styles.backgroundCard,
               { width: CARD_WIDTH, height: CARD_HEIGHT },
@@ -164,92 +192,57 @@ export default function ShayariFullViewScreen({ route }) {
             resizeMode="cover"
           >
             <View style={styles.textWrapper}>
-              <Text style={styles.shayariText}>{shayari}</Text>
+              <FlatList
+                ref={flatListRef}
+                data={shayariList}
+                keyExtractor={(item) => item._id}
+                pagingEnabled
+                snapToAlignment="center"
+                showsVerticalScrollIndicator={false}
+                getItemLayout={(data, index) => ({
+                  length: CARD_HEIGHT,
+                  offset: CARD_HEIGHT * index,
+                  index,
+                })}
+                initialNumToRender={3}
+                windowSize={5}
+                onViewableItemsChanged={onViewableItemsChanged.current}
+                viewabilityConfig={viewabilityConfig}
+                renderItem={({ item }) => {
+                  const shayari = item.text.replace(/\\n/g, "\n");
+                  return (
+                    <View
+                      style={{
+                        height: CARD_HEIGHT,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        paddingHorizontal: 20,
+                      }}
+                    >
+                      <Text style={styles.shayariText}>{shayari}</Text>
+                    </View>
+                  );
+                }}
+              />
             </View>
           </ImageBackground>
         </View>
       </View>
 
-      <ImageBackground
-        source={require("../assets/bgbottom.png")}
-        style={styles.actionBar}
-      >
-        <TouchableOpacity onPress={() => handleCopy(route.params.shayari)}>
-          {isCopied ? (
-            <TickIcon width={22} height={20} fill="#000" />
-          ) : (
-            <CopyIcon width={22} height={20} fill="#000" />
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleEdit(route.params.shayari)}>
-          <EditIcon width={22} height={20} fill="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleShare(route.params.shayari)}>
-          <ShareIcon width={22} height={20} fill="#000" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => toggleFavorite(route.params.shayari)}>
-          {isFav ? (
-            <LikedIcon width={22} height={20} fill="#000" />
-          ) : (
-            <FavIcon width={22} height={20} fill="#000" />
-          )}
-        </TouchableOpacity>
-      </ImageBackground>
+      <ShayariCardActions
+        onShare={() => handleShare(shayaris)}
+        shayari={shayaris}
+        isExpand={false}
+        isBg={true}
+      />
 
       {/* Custom Share Modal */}
-      {customShareModalVisible && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setCustomShareModalVisible(false)}
-            >
-              <Ionicons name="close" size={22} color="#333" />
-            </TouchableOpacity>
-
-            <View style={styles.previewBox} />
-
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={[styles.shareButton, { gap: 7 }]}
-                onPress={() => {
-                  Share.share({
-                    message: selectedShayari?.text.replace(/\\n/g, "\n"),
-                  });
-                  setCustomShareModalVisible(false);
-                }}
-              >
-                <TextIcon width={22} height={20} fill="#000" />
-                <Text style={styles.shareButtonText}>Share Text</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.shareButton}
-                onPress={shareAsImage}
-              >
-                <Ionicons
-                  name="image-outline"
-                  size={18}
-                  color="#fff"
-                  style={{ marginRight: 6 }}
-                />
-                <Text style={styles.shareButtonText}>Share Image</Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity style={styles.saveButton} onPress={saveToGallery}>
-              <Ionicons
-                name="download-outline"
-                size={18}
-                color="#fff"
-                style={{ marginRight: 6 }}
-              />
-              <Text style={styles.shareButtonText}>Save</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+      <CustomShareModal
+        visible={customShareModalVisible}
+        shayari={selectedShayari}
+        onClose={() => setCustomShareModalVisible(false)}
+        cardRef={cardRef}
+      />
     </View>
   );
 }
@@ -260,24 +253,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    // marginTop: 20,
   },
-  backgroundCard: { borderTopRightRadius: 12, borderTopLeftRadius: 12 },
-  imageBorder: { borderTopRightRadius: 12, borderTopLeftRadius: 12 },
+  // backgroundCard: { borderTopRightRadius: 12, borderTopLeftRadius: 12 },
+  // imageBorder: { borderTopRightRadius: 12, borderTopLeftRadius: 12 },
   textWrapper: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    height: "100%",
-    width: "100%",
+    height: CARD_HEIGHT,
+    width: CARD_WIDTH,
   },
   shayariText: {
     textAlign: "center",
-    lineHeight: 24,
+    lineHeight: fontScale * scaleFont(22) * 1.4,
     color: "#000",
-    width: "100%",
-    padding: 10,
-    fontSize: 20,
+    // width: "100%",
+    // padding: 10,
+    fontSize: fontScale * scaleFont(22),
     fontFamily: "Kameron_700Bold",
   },
   actionBar: {
@@ -350,7 +343,7 @@ const styles = StyleSheet.create({
   },
   shareButtonText: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: fontScale * scaleFont(14),
     fontWeight: "600",
   },
 });

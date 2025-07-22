@@ -1,6 +1,13 @@
 // components/CustomAlert.js
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  PixelRatio,
+} from "react-native";
+import { scaleFont } from "./Responsive";
 
 export default function CustomAlert({ visible, title, message, onClose }) {
   console.log(visible);
@@ -19,7 +26,7 @@ export default function CustomAlert({ visible, title, message, onClose }) {
     </View>
   );
 }
-
+const fontScale = PixelRatio.getFontScale();
 const styles = StyleSheet.create({
   overlay: {
     position: "absolute",
@@ -41,14 +48,14 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   title: {
-    fontSize: 18,
+    fontSize: fontScale * scaleFont(18),
     fontWeight: "bold",
     color: "#222",
     marginBottom: 10,
     textAlign: "center",
   },
   message: {
-    fontSize: 15,
+    fontSize: fontScale * scaleFont(15),
     color: "#555",
     marginBottom: 20,
     textAlign: "center",
@@ -61,7 +68,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: fontScale * scaleFont(16),
     fontWeight: "bold",
   },
 });

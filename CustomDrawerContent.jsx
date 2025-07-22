@@ -9,6 +9,8 @@ import {
   Alert,
   Image,
   ImageBackground,
+  Button,
+  NativeModules,
 } from "react-native";
 import {
   DrawerContentScrollView,
@@ -21,15 +23,31 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
+import { fontScale, scale, scaleFont } from "./Responsive";
+const { StartAppAds } = NativeModules;
+import MyShayari from "./assets/myshayariicon.svg";
 
+const showAd = () => {
+  if (StartAppAds && StartAppAds.showInterstitial) {
+    StartAppAds.showInterstitial();
+  } else {
+    Alert.alert("Ad not available", "StartAppAds module not loaded");
+    console.log("StartAppAds:", StartAppAds);
+  }
+};
 export default function CustomDrawerContent(props) {
   const { theme, isDark, toggleTheme } = useTheme();
   // const [user, setUser] = useState(null); // Will hold name and email
-  const { user, logout } = useContext(AuthContext);
-  console.log("userData", user);
+  const { user, logout, isLogin } = useContext(AuthContext);
 
   const navigation = useNavigation();
-
+  useEffect(() => {
+    if (StartAppAds && StartAppAds.initialize) {
+      StartAppAds.initialize("206206234"); // Your Start.io App ID
+    } else {
+      console.warn("StartAppAds module not loaded");
+    }
+  }, []);
   // Function to open the app's store page for rating
   const rateApp = () => {
     // Replace 'com.yourapp.package' with your actual Android package name
@@ -101,7 +119,9 @@ export default function CustomDrawerContent(props) {
                 paddingVertical: 20,
               }}
             >
-              <Text style={{ color: "#fff", fontSize: 25 }}>
+              <Text
+                style={{ color: "#fff", fontSize: fontScale * scaleFont(25) }}
+              >
                 Hindi Shayari Lok
               </Text>
             </View>
@@ -126,6 +146,36 @@ export default function CustomDrawerContent(props) {
             Favourites
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.menuItem]}
+          onPress={() =>
+            navigation.navigate("Shayari", {
+              type: "mine",
+              title: "My Shayari",
+            })
+          }
+        >
+          <MyShayari width={scale(28)} height={scale(28)} />
+          <Text style={[styles.menuText, { color: theme.text }]}>
+            My Shayaris
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.menuItem]}
+          onPress={() =>
+            isLogin
+              ? navigation.navigate("Writeshayari")
+              : navigation.navigate("LoginScreen")
+          }
+        >
+          <Image
+            source={require("./assets/pencil 2.png")}
+            style={styles.pencilIcon}
+          />
+          <Text style={[styles.menuText, { color: theme.text }]}>
+            Write Own Shayari
+          </Text>
+        </TouchableOpacity>
         {/* FeedbackItem */}
         <TouchableOpacity style={styles.menuItem} onPress={moreApps}>
           <FontAwesome5 name="at" size={22} color={theme.text} />
@@ -142,7 +192,10 @@ export default function CustomDrawerContent(props) {
           <Text style={[styles.menuText, { color: theme.text }]}>Rate </Text>
         </TouchableOpacity>
         {/* privacy Item */}
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => navigation.navigate("PrivacyPolicy")}
+        >
           <MaterialIcons name="flag" size={22} color={theme.text} />
           <Text style={[styles.menuText, { color: theme.text }]}>
             Privacy Policy
@@ -155,7 +208,7 @@ export default function CustomDrawerContent(props) {
             Other Apps
           </Text>
         </TouchableOpacity>
-
+        <Button title="Show Interstitial Ad" onPress={showAd} />
         {/* Logout Item */}
         {user && (
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
@@ -198,15 +251,20 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
     marginBottom: 3,
   },
+  pencilIcon: {
+    width: scale(20),
+    height: scale(20),
+    resizeMode: "contain",
+  },
   appName: {
-    fontSize: 22,
+    fontSize: fontScale * scaleFont(22),
     fontWeight: "bold",
     color: "#fff", // White text for header
     marginTop: 8,
   },
   email: {
     color: "#fff", // White text for header
-    fontSize: 14,
+    fontSize: fontScale * scaleFont(14),
     marginTop: 4,
   },
   menuItemsContainer: {
@@ -220,7 +278,7 @@ const styles = StyleSheet.create({
     gap: 16, // Spacing between icon and text
   },
   menuText: {
-    fontSize: 16,
+    fontSize: fontScale * scaleFont(16),
     flex: 1, // Allows text to take remaining space
     fontFamily: "Manrope_400Regular",
   },

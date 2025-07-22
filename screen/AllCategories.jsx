@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../ThemeContext";
 import axios from "axios";
 import SvgImageWithFallback from "../SvgImage";
+import { fontScale, scaleFont } from "../Responsive";
 
 const { width } = Dimensions.get("window");
 const numColumns = 3;
@@ -55,7 +56,7 @@ export default function AllCategories() {
             })
           }
         >
-          <SvgImageWithFallback uri={item.iconUrl} size={44} />
+          <SvgImageWithFallback uri={item.iconUrl} />
         </TouchableOpacity>
         <Text
           style={[styles.title, { color: theme.text }]}
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
-    fontSize: 14,
+    fontSize: fontScale * scaleFont(14),
     fontWeight: "500",
     textAlign: "center",
     marginTop: 4,

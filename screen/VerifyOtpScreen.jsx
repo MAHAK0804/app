@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { AuthContext } from "../AuthContext";
+import { fontScale, scaleFont } from "../Responsive";
 
 export default function VerifyOTPScreen({ navigation, route }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -222,9 +223,9 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   backButton: { padding: 24 },
-  backIcon: { fontSize: 24, color: "#fff" },
+  backIcon: { fontSize: fontScale * scaleFont(24), color: "#fff" },
   title: {
-    fontSize: 30,
+    fontSize: fontScale * scaleFont(30),
     color: "#fff",
     fontFamily: "Manrope_700Bold",
     marginBottom: 10,
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 8,
     textAlign: "center",
-    fontSize: 20,
+    fontSize: fontScale * scaleFont(20),
   },
   resend: {
     color: "#fff",
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: fontScale * scaleFont(20),
     fontFamily: "Manrope_600SemiBold",
   },
   toastContainer: {
@@ -280,12 +281,12 @@ const styles = StyleSheet.create({
   },
   toastOtpText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: fontScale * scaleFont(18),
     fontFamily: "Manrope_700Bold",
   },
   toastTimerText: {
     color: "#ccc",
-    fontSize: 14,
+    fontSize: fontScale * scaleFont(14),
     textAlign: "center",
     fontFamily: "Manrope_400Regular",
     marginTop: 4,

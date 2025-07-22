@@ -30,6 +30,7 @@ import FavIcon from "./assets/heartWhite.svg";
 import ShareIcon from "./assets/shareWhite.svg";
 import TickIcon from "./assets/tick.svg";
 import LikedIcon from "./assets/heart.svg";
+import { fontScale, scaleFont } from "./Responsive";
 
 const { width } = Dimensions.get("window");
 
@@ -39,7 +40,6 @@ const PostSlider = () => {
   const [likedIds, setLikedIds] = useState([]);
   const scrollX = useRef(new Animated.Value(0)).current;
   const { userId } = useContext(AuthContext);
-  console.log("UserId Post", userId);
 
   useEffect(() => {
     const fetchShayaris = async () => {
@@ -54,7 +54,6 @@ const PostSlider = () => {
     };
     fetchShayaris();
   }, []);
-  console.log("Post hsyari", shayariList);
 
   useEffect(() => {
     (async () => {
@@ -115,10 +114,8 @@ const PostSlider = () => {
   const renderItem = useCallback(
     ({ item, widthOverride }) => {
       const isLiked = likedIds.includes(item._id);
-      console.log(copiedId, item._id);
 
       const isCopied = copiedId === item._id;
-      console.log("iscopy", isCopied);
 
       const cardStyle = [
         styles.postCard,
@@ -128,7 +125,7 @@ const PostSlider = () => {
       return (
         <View style={cardStyle}>
           <Image
-            source={require("./assets/Rectangle 26.png")}
+            source={require("./assets/mypostbg.webp")}
             style={styles.postBackground}
           />
           <View style={styles.postOverlay}>
@@ -265,14 +262,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   postsTitle: {
-    fontSize: 18,
+    fontSize: fontScale * scaleFont(18),
     fontWeight: "bold",
     color: "#fff",
     fontFamily: "Manrope_700Bold",
   },
   viewAll: {
     color: "#FFFFFF",
-    fontSize: 14,
+    fontSize: fontScale * scaleFont(14),
     fontFamily: "Manrope_500Medium",
   },
   postCard: {
@@ -299,7 +296,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   postText: {
-    fontSize: 16,
+    fontSize: fontScale * scaleFont(16),
     color: "#fff",
     textAlign: "center",
     lineHeight: 24,

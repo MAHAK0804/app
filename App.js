@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { ActivityIndicator, LogBox } from "react-native";
+import { ActivityIndicator, LogBox, NativeModules } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { RootSiblingParent } from "react-native-root-siblings";
 import * as SplashScreen from "expo-splash-screen";
@@ -11,15 +11,18 @@ import { AuthProvider } from "./AuthContext.js";
 
 SplashScreen.preventAutoHideAsync(); // keep splash until fonts load
 LogBox.ignoreAllLogs();
+const { StartAppAds } = NativeModules;
 export default function App() {
   const fontsLoaded = useCustomFonts();
-
+  console.log("StartAppAds:", StartAppAds);
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
-
+  useEffect(() => {
+    StartAppAds.initialize("206206234");
+  }, []);
   if (!fontsLoaded) {
     return <ActivityIndicator size="large" style={{ flex: 1 }} />;
   }

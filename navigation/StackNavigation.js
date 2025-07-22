@@ -13,6 +13,10 @@ import WriteShayari from "../screen/WriteShayari";
 import LoginScreen from "../screen/LoginScreen";
 import VerifyOTPScreen from "../screen/VerifyOtpScreen";
 import ShayariListScreen from "../screen/ShayariByCategory";
+import WheelGame from "../screen/WheelGame";
+import PrivacyPolicyScreen from "../screen/PrivacyPolicies";
+import AllCategories from "../screen/AllCategories";
+import { fontScale, scaleFont } from "../Responsive";
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 const CustomEditHeader = ({ theme, title }) => {
@@ -82,7 +86,11 @@ function HomeStack({ navigation }) {
           ),
         }}
       />
-
+      <Stack.Screen
+        name="WheelGame"
+        component={WheelGame}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="Shayari"
         component={ShayariListScreen}
@@ -111,6 +119,15 @@ function HomeStack({ navigation }) {
           header: () => <CustomEditHeader theme={theme} title="Edit" />,
         }}
       />
+      <Stack.Screen
+        name="AllCategories"
+        component={AllCategories}
+        options={{
+          header: () => (
+            <CustomEditHeader theme={theme} title="AllCategories" />
+          ),
+        }}
+      />
 
       <Stack.Screen
         name="Writeshayari"
@@ -129,6 +146,11 @@ function HomeStack({ navigation }) {
         component={VerifyOTPScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="PrivacyPolicy"
+        component={PrivacyPolicyScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }
@@ -139,7 +161,7 @@ export default function DrawerNavigation() {
   return (
     <NavigationContainer>
       <Drawer.Navigator
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
+        drawerContent={(props) => <CustomDrawerContent Content {...props} />}
         screenOptions={{
           drawerStyle: {
             backgroundColor: theme.background,
@@ -180,7 +202,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   headerTitleText: {
-    fontSize: 20,
+    fontSize: fontScale * scaleFont(20),
     textAlign: "start",
     fontFamily: "Manrope_400Regular",
   },

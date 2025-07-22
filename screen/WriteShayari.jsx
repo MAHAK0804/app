@@ -39,6 +39,7 @@ import ShareIcon from "../assets/shareWhite.svg";
 import TickIcon from "../assets/tick.svg";
 import LikedIcon from "../assets/heartfill.svg";
 import { AuthContext } from "../AuthContext";
+import { fontScale, scaleFont } from "../Responsive";
 const { width } = Dimensions.get("window");
 
 export default function WriteShayari({ route }) {
@@ -484,7 +485,7 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 18,
+    fontSize: fontScale * scaleFont(18),
     fontWeight: "600",
     color: "#fff",
   },
@@ -604,7 +605,7 @@ const styles = StyleSheet.create({
   },
   shareButtonText: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: fontScale * scaleFont(14),
     fontWeight: "600",
   },
 });
