@@ -1,5 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.RECORD_AUDIO"/>
@@ -23,7 +22,5 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-    <activity android:name="com.startapp.sdk.adsbase.activities.OverlayActivity" android:theme="@android:style/Theme.Translucent"/>
-    <activity android:name="com.startapp.sdk.adsbase.activities.FullScreenActivity" android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
   </application>
 </manifest>

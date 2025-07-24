@@ -19,7 +19,7 @@ import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomAlert from "../CustomAlert";
 import TextIcon from "../assets/blacktext.svg";
-import UploadGallery from "../assets/uploadgallery.svg";
+import UploadGallery from "../assets/upload.svg";
 import ShayariCardActions from "../Action";
 import CustomShareModal from "../CustomShareModal";
 import { fontScale, moderateScale, scaleFont } from "../Responsive";
@@ -402,10 +402,13 @@ export default function ShayariCardExact({ route }) {
                     },
                   ]}
                 >
-                  <Image
+                  {/* <Image
                     source={require("../assets/Mask group.png")}
                     style={{ width: "100%", height: "100%" }}
-                  />
+                  /> */}
+                  {/* <View style={{ width: 30, height: 30 }}> */}
+                  <UploadGallery width={80} height={80} />
+                  {/* </View> */}
                 </TouchableOpacity>
 
                 {/* Predefined background images */}
@@ -480,33 +483,40 @@ export default function ShayariCardExact({ route }) {
         {/* Grid Menu */}
         <View style={styles.gridContainer}>
           {menuItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.gridItem}
-              onPress={() => handleItemPress(item.name)}
-            >
-              <View style={styles.iconWrapper}>
-                {item.type === "icon" && (
-                  <Feather name={item.iconName} size={23} color="#000" />
-                )}
-                {item.type === "image" && (
-                  <TextIcon width={22} height={20} fill="#000" />
-                )}
-                {item.type === "color" && (
-                  <View
-                    style={[styles.colorBox, { backgroundColor: item.color }]}
-                  />
-                )}
-                {item.type === "background" && (
-                  <ImageBackground
-                    source={require("../assets/image_5.webp")}
-                    style={styles.backgroundPreview}
-                    imageStyle={{ borderRadius: 15 }}
-                  />
-                )}
-              </View>
-              <Text style={styles.itemText}>{item.name}</Text>
-            </TouchableOpacity>
+            <View style={styles.gridItem}>
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => handleItemPress(item.name)}
+              >
+                <View style={styles.iconWrapper}>
+                  {item.type === "icon" && (
+                    <Feather name={item.iconName} size={23} color="#000" />
+                  )}
+                  {item.type === "image" && (
+                    <TextIcon width={22} height={20} fill="#000" />
+                  )}
+                  {item.type === "color" && (
+                    <View
+                      style={[styles.colorBox, { backgroundColor: item.color }]}
+                    />
+                  )}
+                  {item.type === "background" && (
+                    <ImageBackground
+                      source={require("../assets/image_5.webp")}
+                      style={styles.backgroundPreview}
+                      imageStyle={{ borderRadius: 15 }}
+                    />
+                  )}
+                </View>
+              </TouchableOpacity>
+              <Text
+                style={styles.itemText}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {item.name}
+              </Text>
+            </View>
           ))}
         </View>
       </View>
@@ -602,7 +612,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   gridItem: {
-    width: (SCREEN_WIDTH - 90) / 3,
+    flexBasis: "30%",
     aspectRatio: 1,
     justifyContent: "center",
     alignItems: "center",

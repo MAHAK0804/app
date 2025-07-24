@@ -25,7 +25,7 @@ import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { fontScale, scale, scaleFont } from "./Responsive";
 import MyShayari from "./assets/myshayariicon.svg";
-
+import AtRateIcon from "./assets/atrate.svg";
 export default function CustomDrawerContent(props) {
   const { theme, isDark, toggleTheme } = useTheme();
   // const [user, setUser] = useState(null); // Will hold name and email
@@ -163,7 +163,7 @@ export default function CustomDrawerContent(props) {
         </TouchableOpacity>
         {/* FeedbackItem */}
         <TouchableOpacity style={styles.menuItem} onPress={moreApps}>
-          <FontAwesome5 name="at" size={22} color={theme.text} />
+          <AtRateIcon />
           <Text style={[styles.menuText, { color: theme.text }]}>Feedback</Text>
         </TouchableOpacity>
         {/*share Item */}
@@ -193,10 +193,7 @@ export default function CustomDrawerContent(props) {
             Other Apps
           </Text>
         </TouchableOpacity>
-        <Button
-          title="Show Interstitial Ad"
-          onPress={() => navigation.navigate("Ads")}
-        />
+
         {/* Logout Item */}
         {user && (
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>

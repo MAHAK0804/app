@@ -11,18 +11,14 @@ import { AuthProvider } from "./AuthContext.js";
 
 SplashScreen.preventAutoHideAsync(); // keep splash until fonts load
 LogBox.ignoreAllLogs();
-const { StartAppAds } = NativeModules;
 export default function App() {
   const fontsLoaded = useCustomFonts();
-  console.log("StartAppAds:", StartAppAds);
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
-  useEffect(() => {
-    StartAppAds.initialize("206206234");
-  }, []);
+
   if (!fontsLoaded) {
     return <ActivityIndicator size="large" style={{ flex: 1 }} />;
   }

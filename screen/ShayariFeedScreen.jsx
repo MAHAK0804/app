@@ -31,7 +31,6 @@ import { fontScale, moderateScale, scale, scaleFont } from "../Responsive";
 import Gallery from "../assets/gallery.svg";
 import DownloadGallery from "../assets/Download.svg";
 import CrossXMark from "../assets/cross-circle 1.svg";
-import StartAppBanner from "../StartAppBanner";
 const CARD_WIDTH = Dimensions.get("screen").width - 20;
 const CARD_HEIGHT = Dimensions.get("screen").height - 550;
 const ICON_BAR_HEIGHT = 58;

@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#191734",
     paddingHorizontal: 10,
-    paddingTop: 40,
+    paddingVertical: 40,
     paddingBottom: 10,
     elevation: 4,
   },
@@ -197,12 +197,12 @@ const styles = StyleSheet.create({
 
   titleContainer: {
     flex: 1,
-    alignItems: "start",
+    // alignItems: "start",
     justifyContent: "flex-start",
     marginHorizontal: 10,
   },
   headerTitleText: {
-    fontSize: fontScale * scaleFont(20),
+    fontSize: fontScale * scaleFont(18),
     textAlign: "start",
     fontFamily: "Manrope_400Regular",
   },
