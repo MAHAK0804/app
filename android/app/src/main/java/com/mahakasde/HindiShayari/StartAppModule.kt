@@ -30,6 +30,11 @@ class StartAppModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     }
   }
 
+ @ReactMethod
+    fun showVideoAd() {
+        startAppAd.loadAd(StartAppAd.AdMode.REWARDED_VIDEO)
+        startAppAd.showAd()
+    }
 
 
 }
