@@ -3,23 +3,33 @@ package com.mahakasde.HindiShayari
 import com.facebook.react.bridge.*
 import com.startapp.sdk.adsbase.StartAppSDK
 import com.startapp.sdk.adsbase.StartAppAd
+import com.startapp.sdk.adsbase.Ad
+import com.startapp.sdk.adsbase.adlisteners.AdEventListener
+import com.startapp.sdk.adsbase.adlisteners.VideoListener
 
 class StartAppModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
-    override fun getName(): String = "StartAppAds"
+    private var startAppAd: StartAppAd = StartAppAd(reactContext)
+
+    override fun getName(): String {
+        return "StartAppAds"
+    }
 
     @ReactMethod
     fun initialize(appId: String) {
-        StartAppSDK.init(reactApplicationContext, appId, false)
+        StartAppSDK.init(reactApplicationContext, appId, true)
     }
 
     @ReactMethod
-    fun showInterstitial() {
-        val activity = currentActivity
-        if (activity != null) {
-            val ad = StartAppAd(activity)
-            ad.loadAd()
-            ad.showAd()
-        }
+  fun showInterstitial() {
+    val activity = currentActivity
+    activity?.let {
+      val ad = StartAppAd(it)
+      ad.loadAd()  // Optional: preload
+      ad.showAd()
     }
+  }
+
+
+
 }

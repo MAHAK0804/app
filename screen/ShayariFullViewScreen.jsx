@@ -25,15 +25,15 @@ import CopyIcon from "../assets/copyWhite.svg";
 import FavIcon from "../assets/heartWhite.svg";
 import ShareIcon from "../assets/shareWhite.svg";
 import TickIcon from "../assets/tick.svg";
-import LikedIcon from "../assets/heartfill.svg";
+import LikedIcon from "../assets/heart.svg";
 import TextIcon from "../assets/text.svg";
 import ShayariCardActions from "../Action";
 import CustomShareModal from "../CustomShareModal";
-import { fontScale, scaleFont } from "../Responsive";
+import { fontScale, scale, scaleFont } from "../Responsive";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("screen");
 const CARD_WIDTH = SCREEN_WIDTH;
-const CARD_HEIGHT = SCREEN_HEIGHT - 140;
+const CARD_HEIGHT = SCREEN_HEIGHT - 165;
 
 export default function ShayariFullViewScreen({ route }) {
   const [favorites, setFavorites] = useState([]);
@@ -248,7 +248,10 @@ export default function ShayariFullViewScreen({ route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
   cardRow: {
     flexDirection: "row",
     justifyContent: "center",

@@ -106,9 +106,8 @@ const PostSlider = () => {
     }
   }, []);
   const handleEdit = (item) => {
-    navigation.navigate("HomeStack", {
-      screen: "Writeshayari",
-      params: { shayari: item },
+    navigation.navigate("Writeshayari", {
+      shayari: item,
     });
   };
   const renderItem = useCallback(
@@ -119,7 +118,7 @@ const PostSlider = () => {
 
       const cardStyle = [
         styles.postCard,
-        { width: widthOverride || width / 2 - 25 },
+        { width: widthOverride || width / 2 - 25, marginHorizontal: 5 },
       ];
 
       return (
@@ -211,7 +210,7 @@ const PostSlider = () => {
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
-            snapToInterval={length === 3 ? width - 40 : width / 2 - 25 + 14}
+            snapToInterval={length === 3 ? width - 30 : width / 2 - 25 + 14}
             decelerationRate="fast"
             onScroll={Animated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
@@ -221,7 +220,7 @@ const PostSlider = () => {
             renderItem={({ item }) =>
               renderItem({
                 item,
-                widthOverride: length === 3 ? width - 40 : width / 2 - 25,
+                widthOverride: length === 3 ? width - 30 : width / 2 - 25,
               })
             }
             contentContainerStyle={{ paddingHorizontal: 15 }}
@@ -229,7 +228,7 @@ const PostSlider = () => {
 
           <View style={styles.pagination}>
             {postData.map((_, i) => {
-              const itemWidth = length === 3 ? width - 40 : width / 2 - 25 + 14;
+              const itemWidth = length === 3 ? width - 30 : width / 2 - 25 + 14;
               const inputRange = [
                 (i - 1) * itemWidth,
                 i * itemWidth,

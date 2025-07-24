@@ -26,11 +26,12 @@ import CopyIcon from "../assets/copyWhite.svg";
 import FavIcon from "../assets/heartWhite.svg";
 import ShareIcon from "../assets/shareWhite.svg";
 import TickIcon from "../assets/tick.svg";
-import LikedIcon from "../assets/heartfill.svg";
+import LikedIcon from "../assets/heart.svg";
 import { fontScale, moderateScale, scale, scaleFont } from "../Responsive";
 import Gallery from "../assets/gallery.svg";
 import DownloadGallery from "../assets/Download.svg";
 import CrossXMark from "../assets/cross-circle 1.svg";
+import StartAppBanner from "../StartAppBanner";
 const CARD_WIDTH = Dimensions.get("screen").width - 20;
 const CARD_HEIGHT = Dimensions.get("screen").height - 550;
 const ICON_BAR_HEIGHT = 58;
@@ -247,15 +248,24 @@ export default function ShayariFeedScreen() {
         data={data}
         keyExtractor={(item, index) => item._id || index.toString()}
         contentContainerStyle={styles.list}
-        renderItem={({ item, index }) => (
-          <ShayariCard
-            item={item}
-            index={index}
-            onCopy={handleCopy}
-            onFavorite={toggleFavorite}
-            onShare={handleShare}
-          />
-        )}
+        renderItem={({ item, index }) => {
+          // Check if it's a position to show banner
+          // const isBannerPosition = (index + 1) % 10 === 0;
+          // console.log("isBanner", index, isBannerPosition);
+
+          return (
+            <>
+              <ShayariCard
+                item={item}
+                index={index}
+                onCopy={handleCopy}
+                onFavorite={toggleFavorite}
+                onShare={handleShare}
+              />
+              {/* {isBannerPosition && <StartAppBanner />} */}
+            </>
+          );
+        }}
       />
       {customShareModalVisible && (
         <Modal visible={true} transparent animationType="fade">
@@ -392,7 +402,7 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   modalBox: {
-    width: 300,
+    // width: 300,
     backgroundColor: "#fff",
     borderRadius: 20,
     padding: 20,

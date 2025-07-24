@@ -119,7 +119,7 @@ const HomeScreen = () => {
             })
           }
         >
-          <SvgImageWithFallback uri={item.iconUrl} size={44} />
+          <SvgImageWithFallback uri={item.iconUrl} />
         </TouchableOpacity>
         <Text
           style={[styles.title, { color: theme.text }]}
@@ -206,7 +206,7 @@ const HomeScreen = () => {
         <View>
           <Text style={styles.contestHeading}>Spin The Wheel</Text>
           <Text style={styles.contestText}>
-            Play shyari game and unlock{"\n"} surprises
+            Play shyari game and unlock{"\n"}surprises
           </Text>
           <TouchableOpacity
             style={styles.playbtn}
@@ -290,6 +290,7 @@ const styles = StyleSheet.create({
   titleHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: moderateScale(18),
     marginBottom: moderateScale(16),
   },

@@ -16,6 +16,7 @@ import {
   ActivityIndicator,
   ImageBackground,
   Dimensions,
+  NativeModules,
 } from "react-native";
 import { useTheme } from "../ThemeContext";
 import { useNavigation } from "@react-navigation/native";
@@ -24,7 +25,8 @@ import axios from "axios";
 import { AuthContext } from "../AuthContext";
 import ShayariCardActions from "../Action";
 import CustomShareModal from "../CustomShareModal";
-import { fontScale, scaleFont } from "../Responsive";
+import { fontScale, scale, scaleFont } from "../Responsive";
+import StartAppBanner from "../StartAppBanner";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 30;
@@ -44,6 +46,30 @@ export default function ShayariListScreen({ route }) {
   const [customShareModalVisible, setCustomShareModalVisible] = useState(false);
   const [selectedCardRef, setSelectedCardRef] = useState(null);
   const [selectedShayari, setSelectedShayari] = useState(null);
+  const [categoryClickCount, setCategoryClickCount] = useState(0);
+  const { StartAppAds } = NativeModules;
+  const showAd = () => {
+    if (StartAppAds && StartAppAds.showInterstitial) {
+      StartAppAds.showInterstitial();
+    } else {
+      Alert.alert("Ad not available", "StartAppAds module not loaded");
+      console.log("StartAppAds:", StartAppAds);
+    }
+  };
+  // const showVideoAd = () => {
+  //   StartAppAds.showRewarded();
+  // };
+  useEffect(() => {
+    if (StartAppAds && StartAppAds.initialize) {
+      StartAppAds.initialize("206206234"); // Your Start.io App ID
+      // showVideoAd();
+      // setTimeout(() => {
+      //   showVideoAd();
+      // }, 1500);
+    } else {
+      console.warn("StartAppAds module not loaded");
+    }
+  }, []);
 
   const { userId } = useContext(AuthContext);
 
@@ -222,11 +248,22 @@ export default function ShayariListScreen({ route }) {
 
                 return (
                   <TouchableOpacity
-                    onPress={() =>
-                      item._id === "all"
-                        ? setSelectedCategory("All")
-                        : setSelectedCategory(item._id)
-                    }
+                    onPress={() => {
+                      const isAll = item._id === "all";
+                      const newCategory = isAll ? "All" : item._id;
+                      setSelectedCategory(newCategory);
+
+                      setCategoryClickCount((prev) => {
+                        const newCount = prev + 1;
+                        console.log("Category Click Count:", newCount);
+
+                        if (newCount % 4 === 0) {
+                          showAd();
+                        }
+
+                        return newCount;
+                      });
+                    }}
                     style={{
                       paddingHorizontal: 14,
                       height: 36,
@@ -276,12 +313,32 @@ export default function ShayariListScreen({ route }) {
         cardRef={selectedCardRef}
         shayari={selectedShayari}
       />
+      <View style={styles.bannerAdContainer}>
+        <StartAppBanner />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 12, paddingTop: 12 },
+  bannerAdContainer: {
+    width: "100%",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    backgroundColor: "#191734",
+    height: 50, // Adjust based on your ad height
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+
+  container: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: scale(35),
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -292,7 +349,7 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     alignSelf: "center",
-    marginBottom: 16,
+    marginBottom: scale(16),
   },
   card: { width: "100%", height: "100%", borderRadius: 12 },
   captureArea: { flex: 1, overflow: "hidden" },

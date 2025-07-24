@@ -19,13 +19,13 @@ import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomAlert from "../CustomAlert";
 import TextIcon from "../assets/blacktext.svg";
-
+import UploadGallery from "../assets/uploadgallery.svg";
 import ShayariCardActions from "../Action";
 import CustomShareModal from "../CustomShareModal";
 import { fontScale, moderateScale, scaleFont } from "../Responsive";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 10;
-const CARD_HEIGHT = SCREEN_HEIGHT * 0.61;
+const CARD_HEIGHT = SCREEN_HEIGHT * 0.58;
 
 export default function ShayariCardExact({ route }) {
   const [fontSize, setFontSize] = useState(23);
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   gridItem: {
-    width: (SCREEN_WIDTH - 70) / 3,
+    width: (SCREEN_WIDTH - 90) / 3,
     aspectRatio: 1,
     justifyContent: "center",
     alignItems: "center",

@@ -37,7 +37,7 @@ import CopyIcon from "../assets/copyWhite.svg";
 import FavIcon from "../assets/heartWhite.svg";
 import ShareIcon from "../assets/shareWhite.svg";
 import TickIcon from "../assets/tick.svg";
-import LikedIcon from "../assets/heartfill.svg";
+import LikedIcon from "../assets/heart.svg";
 import { AuthContext } from "../AuthContext";
 import { fontScale, scaleFont } from "../Responsive";
 const { width } = Dimensions.get("window");

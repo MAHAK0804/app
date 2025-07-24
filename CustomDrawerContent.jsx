@@ -24,30 +24,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { fontScale, scale, scaleFont } from "./Responsive";
-const { StartAppAds } = NativeModules;
 import MyShayari from "./assets/myshayariicon.svg";
 
-const showAd = () => {
-  if (StartAppAds && StartAppAds.showInterstitial) {
-    StartAppAds.showInterstitial();
-  } else {
-    Alert.alert("Ad not available", "StartAppAds module not loaded");
-    console.log("StartAppAds:", StartAppAds);
-  }
-};
 export default function CustomDrawerContent(props) {
   const { theme, isDark, toggleTheme } = useTheme();
   // const [user, setUser] = useState(null); // Will hold name and email
   const { user, logout, isLogin } = useContext(AuthContext);
 
   const navigation = useNavigation();
-  useEffect(() => {
-    if (StartAppAds && StartAppAds.initialize) {
-      StartAppAds.initialize("206206234"); // Your Start.io App ID
-    } else {
-      console.warn("StartAppAds module not loaded");
-    }
-  }, []);
+
   // Function to open the app's store page for rating
   const rateApp = () => {
     // Replace 'com.yourapp.package' with your actual Android package name
@@ -208,7 +193,10 @@ export default function CustomDrawerContent(props) {
             Other Apps
           </Text>
         </TouchableOpacity>
-        <Button title="Show Interstitial Ad" onPress={showAd} />
+        <Button
+          title="Show Interstitial Ad"
+          onPress={() => navigation.navigate("Ads")}
+        />
         {/* Logout Item */}
         {user && (
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
