@@ -17,6 +17,7 @@ import WheelGame from "../screen/WheelGame";
 import PrivacyPolicyScreen from "../screen/PrivacyPolicies";
 import AllCategories from "../screen/AllCategories";
 import { fontScale, scaleFont } from "../Responsive";
+import Ads from "../Ads";
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 const CustomEditHeader = ({ theme, title }) => {
@@ -149,6 +150,11 @@ function HomeStack({ navigation }) {
       <Stack.Screen
         name="PrivacyPolicy"
         component={PrivacyPolicyScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Ads"
+        component={Ads}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
