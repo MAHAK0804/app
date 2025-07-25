@@ -288,6 +288,9 @@ export default function ShayariListScreen({ route }) {
         cardRef={selectedCardRef}
         shayari={selectedShayari}
       />
+      <View style={styles.bannerAdContainer}>
+        <StartAppBanner />
+      </View>
     </View>
   );
 }
