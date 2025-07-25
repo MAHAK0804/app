@@ -187,12 +187,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#191734",
     paddingHorizontal: 10,
-    paddingVertical: 40,
+    paddingVertical: 43,
     paddingBottom: 10,
     elevation: 4,
   },
   iconLeft: {
-    padding: 1,
+    // padding: 1,
+    marginVertical: 2,
   },
 
   titleContainer: {

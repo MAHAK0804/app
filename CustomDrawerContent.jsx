@@ -11,6 +11,7 @@ import {
   ImageBackground,
   Button,
   NativeModules,
+  Dimensions,
 } from "react-native";
 import {
   DrawerContentScrollView,
@@ -26,11 +27,12 @@ import { AuthContext } from "./AuthContext";
 import { fontScale, scale, scaleFont } from "./Responsive";
 import MyShayari from "./assets/myshayariicon.svg";
 import AtRateIcon from "./assets/atrate.svg";
+import { LinearGradient } from "expo-linear-gradient";
+const { width } = Dimensions.get("screen");
 export default function CustomDrawerContent(props) {
   const { theme, isDark, toggleTheme } = useTheme();
   // const [user, setUser] = useState(null); // Will hold name and email
   const { user, logout, isLogin } = useContext(AuthContext);
-
   const navigation = useNavigation();
 
   // Function to open the app's store page for rating
@@ -201,6 +203,21 @@ export default function CustomDrawerContent(props) {
             <Text style={[styles.menuText, { color: theme.text }]}>Logout</Text>
           </TouchableOpacity>
         )}
+        <View style={styles.container}>
+          <LinearGradient
+            colors={["#ffffff00", "#ffffff80", "#ffffff"]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={styles.line}
+          />
+          <Text style={styles.versionText}>Version 1.0</Text>
+          <LinearGradient
+            colors={["#ffffff", "#ffffff80", "#ffffff00"]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={styles.line}
+          />
+        </View>
       </View>
     </DrawerContentScrollView>
   );
@@ -210,6 +227,22 @@ export default function CustomDrawerContent(props) {
 const styles = StyleSheet.create({
   drawerContainer: {
     flex: 1, // Ensures the drawer content fills the available space
+  },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    marginVertical: 20,
+  },
+  line: {
+    height: 1,
+    width: width * 0.3,
+  },
+  versionText: {
+    marginHorizontal: 10,
+    fontSize: 18,
+    color: "#fff",
   },
   headerBackground: {
     width: "100%",

@@ -1,3 +1,4 @@
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -5,6 +6,10 @@
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
   <uses-permission android:name="android.permission.VIBRATE"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.BLUETOOTH"/>
+  <uses-permission android:name="android.permission.Ad_ID"/>
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" tools:node="remove"/>
   <queries>
     <intent>
       <action android:name="android.intent.action.VIEW"/>
@@ -22,5 +27,17 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+    <meta-data
+      android:name="com.startapp.sdk.APPLICATION_ID"
+      android:value="206206234"/>
+    <meta-data
+        android:name="com.startapp.sdk.MIXED_AUDIENCE"
+        android:value="true"/>
+    <meta-data
+        android:name="com.startapp.sdk.MIXED_AUDIENCE"
+        android:value="true"/>
+    <meta-data
+        android:name="com.startapp.sdk.SPLASH_ENABLED"
+        android:value="false" />
   </application>
 </manifest>
