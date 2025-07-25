@@ -19,13 +19,13 @@ import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomAlert from "../CustomAlert";
 import TextIcon from "../assets/blacktext.svg";
-import UploadGallery from "../assets/uploadgallery.svg";
+import UploadGallery from "../assets/upload.svg";
 import ShayariCardActions from "../Action";
 import CustomShareModal from "../CustomShareModal";
 import { fontScale, moderateScale, scaleFont } from "../Responsive";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 10;
-const CARD_HEIGHT = SCREEN_HEIGHT * 0.58;
+const CARD_HEIGHT = SCREEN_HEIGHT * 0.6;
 
 export default function ShayariCardExact({ route }) {
   const [fontSize, setFontSize] = useState(23);
@@ -394,20 +394,14 @@ export default function ShayariCardExact({ route }) {
                 {/* Upload from gallery option */}
                 <TouchableOpacity
                   onPress={pickImageFromGallery}
-                  style={[
-                    styles.bgImageOption2,
-                    {
-                      justifyContent: "center",
-                      alignItems: "center",
-                    },
-                  ]}
+                  style={{
+                    width: 80,
+                    height: 80,
+                    paddingRight: 5,
+                  }}
                 >
-                  <Image
-                    source={require("../assets/Mask group.png")}
-                    style={{ width: "100%", height: "100%" }}
-                  />
+                  <UploadGallery width="100%" height="100%" />
                 </TouchableOpacity>
-
                 {/* Predefined background images */}
                 {[
                   require("../assets/image_1.webp"),
@@ -480,33 +474,40 @@ export default function ShayariCardExact({ route }) {
         {/* Grid Menu */}
         <View style={styles.gridContainer}>
           {menuItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.gridItem}
-              onPress={() => handleItemPress(item.name)}
-            >
-              <View style={styles.iconWrapper}>
-                {item.type === "icon" && (
-                  <Feather name={item.iconName} size={23} color="#000" />
-                )}
-                {item.type === "image" && (
-                  <TextIcon width={22} height={20} fill="#000" />
-                )}
-                {item.type === "color" && (
-                  <View
-                    style={[styles.colorBox, { backgroundColor: item.color }]}
-                  />
-                )}
-                {item.type === "background" && (
-                  <ImageBackground
-                    source={require("../assets/image_5.webp")}
-                    style={styles.backgroundPreview}
-                    imageStyle={{ borderRadius: 15 }}
-                  />
-                )}
-              </View>
-              <Text style={styles.itemText}>{item.name}</Text>
-            </TouchableOpacity>
+            <View style={styles.gridItem}>
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => handleItemPress(item.name)}
+              >
+                <View style={styles.iconWrapper}>
+                  {item.type === "icon" && (
+                    <Feather name={item.iconName} size={23} color="#000" />
+                  )}
+                  {item.type === "image" && (
+                    <TextIcon width={22} height={20} fill="#000" />
+                  )}
+                  {item.type === "color" && (
+                    <View
+                      style={[styles.colorBox, { backgroundColor: item.color }]}
+                    />
+                  )}
+                  {item.type === "background" && (
+                    <ImageBackground
+                      source={require("../assets/image_5.webp")}
+                      style={styles.backgroundPreview}
+                      imageStyle={{ borderRadius: 15 }}
+                    />
+                  )}
+                </View>
+              </TouchableOpacity>
+              <Text
+                style={styles.itemText}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {item.name}
+              </Text>
+            </View>
           ))}
         </View>
       </View>
@@ -603,7 +604,7 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: (SCREEN_WIDTH - 90) / 3,
-    aspectRatio: 1,
+    aspectRatio: 1.25,
     justifyContent: "center",
     alignItems: "center",
     margin: 5,
@@ -691,8 +692,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 10,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    // borderTopLeftRadius: 20,
+    // borderTopRightRadius: 20,
   },
   bgImageOption: {
     marginRight: 10,
@@ -702,11 +703,10 @@ const styles = StyleSheet.create({
     borderColor: "#191734",
   },
   bgImageOption2: {
-    marginRight: 10,
-    borderRadius: 10,
-    overflow: "hidden",
-    width: 80,
-    height: 80,
+    // borderRadius: 10,
+    // overflow: "hidden",
+    // width: 80,
+    // height: 80,
   },
   alertOverlay: {
     position: "absolute",

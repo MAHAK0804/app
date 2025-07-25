@@ -19,14 +19,12 @@ import {
   NativeModules,
 } from "react-native";
 import { useTheme } from "../ThemeContext";
-import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { AuthContext } from "../AuthContext";
 import ShayariCardActions from "../Action";
 import CustomShareModal from "../CustomShareModal";
 import { fontScale, scale, scaleFont } from "../Responsive";
-import StartAppBanner from "../StartAppBanner";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 30;
@@ -47,29 +45,6 @@ export default function ShayariListScreen({ route }) {
   const [selectedCardRef, setSelectedCardRef] = useState(null);
   const [selectedShayari, setSelectedShayari] = useState(null);
   const [categoryClickCount, setCategoryClickCount] = useState(0);
-  const { StartAppAds } = NativeModules;
-  const showAd = () => {
-    if (StartAppAds && StartAppAds.showInterstitial) {
-      StartAppAds.showInterstitial();
-    } else {
-      Alert.alert("Ad not available", "StartAppAds module not loaded");
-      console.log("StartAppAds:", StartAppAds);
-    }
-  };
-  // const showVideoAd = () => {
-  //   StartAppAds.showRewarded();
-  // };
-  useEffect(() => {
-    if (StartAppAds && StartAppAds.initialize) {
-      StartAppAds.initialize("206206234"); // Your Start.io App ID
-      // showVideoAd();
-      // setTimeout(() => {
-      //   showVideoAd();
-      // }, 1500);
-    } else {
-      console.warn("StartAppAds module not loaded");
-    }
-  }, []);
 
   const { userId } = useContext(AuthContext);
 
@@ -313,9 +288,6 @@ export default function ShayariListScreen({ route }) {
         cardRef={selectedCardRef}
         shayari={selectedShayari}
       />
-      <View style={styles.bannerAdContainer}>
-        <StartAppBanner />
-      </View>
     </View>
   );
 }

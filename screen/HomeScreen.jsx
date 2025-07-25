@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: moderateScale(18),
+    paddingHorizontal: moderateScale(10),
     marginBottom: moderateScale(16),
   },
   titleText: {
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   },
   viewAll: {
     color: "#FFFFFF",
-    fontSize: fontScale * scaleFont(13),
+    fontSize: fontScale * scaleFont(16),
     fontFamily: "Manrope_500Medium",
   },
   cardWrapper: {
