@@ -79,7 +79,7 @@ export default function CustomShareModal({
               onClose();
             }}
           >
-            <TextIcon width={22} height={20} fill="#000" />
+            <TextIcon width={16} height={20} fill="#000" />
             <Text style={styles.shareButtonText}>Share Text</Text>
           </TouchableOpacity>
 
@@ -87,7 +87,7 @@ export default function CustomShareModal({
             style={[styles.shareButton, { gap: 7 }]}
             onPress={shareAsImage}
           >
-            <Gallery width={22} height={20} fill="#000" />
+            <Gallery width={16} height={20} fill="#000" />
 
             <Text style={styles.shareButtonText}>Share Image</Text>
           </TouchableOpacity>
@@ -97,7 +97,7 @@ export default function CustomShareModal({
           style={[styles.saveButton, { gap: 7 }]}
           onPress={saveToGallery}
         >
-          <DownloadGallery width={22} height={20} fill="#000" />
+          <DownloadGallery width={16} height={20} fill="#000" />
 
           <Text style={styles.shareButtonText}>Save</Text>
         </TouchableOpacity>

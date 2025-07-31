@@ -31,12 +31,19 @@ import MyShayari from "../assets/myshayariicon.svg";
 import Fav from "../assets/favouriteicon.svg";
 import WheelSpin from "../assets/wheelspin.svg";
 import { fontScale, moderateScale, scale, scaleFont } from "../Responsive";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from "react-native-google-mobile-ads";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("screen");
 const numColumns = 3;
 const cardSize = width / numColumns - 20;
 const iconSize = PixelRatio.roundToNearestPixel(44);
 const HomeScreen = () => {
+  const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
@@ -53,12 +60,13 @@ const HomeScreen = () => {
       const randomShayaris = res.data
         .sort(() => 0.5 - Math.random())
         .slice(0, 3);
-      setSpotlightShayaris(randomShayaris);
-      return randomShayaris;
+      return randomShayaris; // ✅ Only return the data
     } catch (error) {
       console.error("Error fetching spotlight shayaris:", error);
+      return []; // fallback
     }
   }, []);
+
 
   const getAllCategories = useCallback(async () => {
     try {
@@ -74,7 +82,9 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      await Promise.all([getAllCategories(), getSpotlightShayaris()]);
+      await getAllCategories();
+      const shayaris = await getSpotlightShayaris();
+      setSpotlightShayaris(shayaris); // ✅ Only here we set it once
       setLoading(false);
     };
     fetchData();
@@ -142,132 +152,146 @@ const HomeScreen = () => {
   }
 
   return (
-    <ScrollView style={{ backgroundColor: theme.background, flex: 1 }}>
-      {/* Categories Section */}
-      <View style={styles.section}>
-        <View style={styles.titleHeader}>
-          <Text style={styles.titleText}>Categories</Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("AllCategories")}
-          >
-            <Text style={styles.viewAll}>View all</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={categories.slice(0, 9)}
-          contentContainerStyle={styles.gridContent}
-          keyExtractor={(item) => item._id}
-          numColumns={numColumns}
-          scrollEnabled={false}
-          renderItem={renderCategory}
-          initialNumToRender={9}
-          removeClippedSubviews
-          maxToRenderPerBatch={9}
-          windowSize={5}
-        />
-      </View>
-
-      {/* Write Shayari Box */}
-      <View style={styles.writeBox}>
-        <Text style={styles.writeHeading}>लिखो अपनी कहानी, शायरी</Text>
-        <Text style={styles.writeHeading}>की ज़ुबान में</Text>
-        <TouchableOpacity
-          style={styles.writeButton}
-          onPress={() =>
-            isLogin
-              ? navigation.navigate("Writeshayari")
-              : navigation.navigate("LoginScreen")
-          }
-        >
-          <View style={styles.iconWrapper}>
-            <Image
-              source={require("../assets/pencil 2.png")}
-              style={styles.pencilIcon}
-            />
-          </View>
-
-          <View style={{ marginLeft: 12 }}>
-            <Text
-              style={styles.buttonTitle}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              Write Your Own Shayari
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      {/* Contest Section */}
-      <View style={styles.contestBox}>
-        <View style={styles.wheelIconWrapper}>
-          <WheelSpin width={scale(116)} height={scale(116)} />
-        </View>
-        <View>
-          <Text style={styles.contestHeading}>Spin The Wheel</Text>
-          <Text style={styles.contestText}>
-            Play shyari game and unlock{"\n"}surprises
-          </Text>
-          <TouchableOpacity
-            style={styles.playbtn}
-            onPress={() => navigation.navigate("WheelGame")}
-          >
-            <Text style={styles.playbtnText}>Play now</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Spotlight Shayaris */}
-      <ShayariSpotlightSlider
-        data={spotlightShayaris}
-        fetchNewShayaris={getSpotlightShayaris}
-      />
-
-      {/* Quick Links */}
-      <View
-        style={[styles.quickLinksContainer, { backgroundColor: theme.card }]}
-      >
-        <FlatList
-          data={quickLinks}
-          keyExtractor={(item) => item.title}
-          renderItem={({ item }) => (
+    <View style={{ flex: 1 }}>
+      <ScrollView style={{ backgroundColor: theme.background, flex: 1 }}>
+        {/* Categories Section */}
+        <View style={styles.section}>
+          <View style={styles.titleHeader}>
+            <Text style={styles.titleText}>Categories</Text>
             <TouchableOpacity
-              style={styles.quickRow}
-              onPress={() =>
-                navigation.navigate("Shayari", {
-                  type: item.type,
-                  title: item.title,
-                })
-              }
+              onPress={() => navigation.navigate("AllCategories")}
             >
-              <View style={styles.quickIcon}>
-                <item.icon width={scale(28)} height={scale(28)} />
-              </View>
-
-              <Text style={[styles.quickText, { color: theme.text }]}>
-                {item.title}
-              </Text>
+              <Text style={styles.viewAll}>View all</Text>
             </TouchableOpacity>
-          )}
-          ItemSeparatorComponent={() => <View style={styles.divider} />}
-          scrollEnabled={false}
+          </View>
+          <FlatList
+            data={categories.slice(0, 9)}
+            contentContainerStyle={styles.gridContent}
+            keyExtractor={(item) => item._id}
+            numColumns={numColumns}
+            scrollEnabled={false}
+            renderItem={renderCategory}
+            initialNumToRender={9}
+            removeClippedSubviews
+            maxToRenderPerBatch={9}
+            windowSize={5}
+          />
+        </View>
+
+        {/* Write Shayari Box */}
+        <View style={styles.writeBox}>
+          <Text style={styles.writeHeading}>लिखो अपनी कहानी, शायरी</Text>
+          <Text style={styles.writeHeading}>की ज़ुबान में</Text>
+          <TouchableOpacity
+            style={styles.writeButton}
+            onPress={() =>
+              isLogin
+                ? navigation.navigate("Writeshayari")
+                : navigation.navigate("LoginScreen")
+            }
+          >
+            <View style={styles.iconWrapper}>
+              <Image
+                source={require("../assets/pencil 2.png")}
+                style={styles.pencilIcon}
+              />
+            </View>
+
+            <View style={{ marginLeft: 12 }}>
+              <Text
+                style={styles.buttonTitle}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                Write Your Own Shayari
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Contest Section */}
+        {/* <View style={styles.contestBox}>
+          <View style={styles.wheelIconWrapper}>
+            <WheelSpin width={scale(116)} height={scale(116)} />
+          </View>
+          <View>
+            <Text style={styles.contestHeading}>Spin The Wheel</Text>
+            <Text style={styles.contestText}>
+              Play shyari game and unlock{"\n"}surprises
+            </Text>
+            <TouchableOpacity
+              style={styles.playbtn}
+              onPress={() => navigation.navigate("WheelGame")}
+            >
+              <Text style={styles.playbtnText}>Play now</Text>
+            </TouchableOpacity>
+          </View>
+        </View> */}
+
+        {/* Spotlight Shayaris */}
+        <ShayariSpotlightSlider
+          data={spotlightShayaris}
+          fetchNewShayaris={getSpotlightShayaris}
+        />
+
+        {/* Quick Links */}
+        <View
+          style={[styles.quickLinksContainer, { backgroundColor: theme.card }]}
+        >
+          <FlatList
+            data={quickLinks}
+            keyExtractor={(item) => item.title}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.quickRow}
+                onPress={() =>
+                  navigation.navigate("Shayari", {
+                    type: item.type,
+                    title: item.title,
+                  })
+                }
+              >
+                <View style={styles.quickIcon}>
+                  <item.icon width={scale(28)} height={scale(28)} />
+                </View>
+
+                <Text style={[styles.quickText, { color: theme.text }]}>
+                  {item.title}
+                </Text>
+              </TouchableOpacity>
+            )}
+            ItemSeparatorComponent={() => <View style={styles.divider} />}
+            scrollEnabled={false}
+          />
+        </View>
+
+        {/* Posts Slider */}
+        {userId && (
+          <Suspense fallback={<ActivityIndicator size="small" color="#4E47A7" />}>
+            <PostSlider />
+          </Suspense>
+        )}
+        {/* Shayri Feed */}
+        <Text
+          style={[styles.titleText, { paddingHorizontal: 20, marginVertical: 3 }]}
+        >
+          Most Loved Shayaris
+        </Text>
+        <ShayariFeedScreen />
+      </ScrollView>
+      <View style={{ position: 'absolute', bottom: insets.bottom, left: 0, right: 0 }}>
+        <BannerAd
+          unitId={TestIds.BANNER}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true,
+            networkExtras: {
+              collapsible: "bottom",
+            },
+          }}
         />
       </View>
-
-      {/* Posts Slider */}
-      {userId && (
-        <Suspense fallback={<ActivityIndicator size="small" color="#4E47A7" />}>
-          <PostSlider />
-        </Suspense>
-      )}
-      {/* Shayri Feed */}
-      <Text
-        style={[styles.titleText, { paddingHorizontal: 20, marginVertical: 3 }]}
-      >
-        Most Loved Shayaris
-      </Text>
-      <ShayariFeedScreen />
-    </ScrollView>
+    </View>
   );
 };
 
@@ -339,21 +363,26 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_700Bold",
   },
   writeBox: {
-    marginHorizontal: moderateScale(16),
-    marginTop: moderateScale(20),
+    minHeight: scale(120), // ensures space for both lines
+    marginHorizontal: moderateScale(10),
+    marginVertical: moderateScale(20),
     backgroundColor: "#1F2B35",
     paddingVertical: moderateScale(20),
-    paddingHorizontal: moderateScale(2),
+    paddingHorizontal: moderateScale(10),
     borderRadius: moderateScale(16),
     alignItems: "center",
+    justifyContent: "center", // ✅ vertically center content
   },
+
   writeHeading: {
     color: "#ffffff",
-    fontSize: fontScale * scaleFont(20),
+    fontSize: scaleFont(20), // more consistent cross-device
     textAlign: "center",
-    lineHeight: moderateScale(30),
-    fontFamily: "Manrope_400Regular",
+    lineHeight: scaleFont(26),
+    fontFamily: "Manrope_500Medium", // slightly bolder for clarity
+    paddingHorizontal: 10, // allow breathing room on smaller screens
   },
+
   writeButton: {
     backgroundColor: "#fff",
     flexDirection: "row",

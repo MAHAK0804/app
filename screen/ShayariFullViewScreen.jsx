@@ -230,6 +230,7 @@ export default function ShayariFullViewScreen({ route }) {
       </View>
 
       <ShayariCardActions
+        title={route.params.title}
         onShare={() => handleShare(shayaris)}
         shayari={shayaris}
         isExpand={false}

@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   resend: {
     color: "#fff",
-    marginTop: 10,
+    // marginTop: 10,
     textAlign: "center",
     fontFamily: "Manrope_400Regular",
   },

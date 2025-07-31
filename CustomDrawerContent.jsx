@@ -77,10 +77,10 @@ export default function CustomDrawerContent(props) {
             <>
               <View style={[styles.headerOverlay]}>
                 {/* Profile Image - Placeholder */}
-                <Image
+                {/* <Image
                   source={require("./assets/Ellipse 32.png")} // Placeholder for Aayushi's image
                   style={styles.profileImage}
-                />
+                /> */}
                 <Text style={styles.appName}>{user.name}</Text>
                 <Text style={styles.email}>
                   {user.email ? user.email : user.phone}

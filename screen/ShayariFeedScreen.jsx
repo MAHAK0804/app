@@ -31,6 +31,9 @@ import { fontScale, moderateScale, scale, scaleFont } from "../Responsive";
 import Gallery from "../assets/gallery.svg";
 import DownloadGallery from "../assets/Download.svg";
 import CrossXMark from "../assets/cross-circle 1.svg";
+import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
+import NativeAdCard from "../NativeCardAds";
+import NativeCard from "../NativeCardAds";
 const CARD_WIDTH = Dimensions.get("screen").width - 20;
 const CARD_HEIGHT = Dimensions.get("screen").height - 550;
 const ICON_BAR_HEIGHT = 58;
@@ -198,7 +201,53 @@ export default function ShayariFeedScreen() {
     const textColor = backgroundColor === "#ffffff" ? "#111" : "#fff";
     const isFavorite = favorites.some((fav) => fav._id === item._id);
     const isCopied = copiedId === item._id;
+    if ((index + 1) % 5 === 0) {
+      return (
+        <>
+          <View style={[styles.card, { backgroundColor }]}>
+            <View style={styles.textWrapper}>
+              <Text style={[styles.text, { color: textColor }]}>
+                {item.text.replace(/\\n/g, "\n")}
+              </Text>
+            </View>
 
+            <View style={styles.iconBar}>
+              <TouchableOpacity onPress={() => onCopy(item)}>
+                {isCopied ? (
+                  <TickIcon width={22} height={20} fill="#000" />
+                ) : (
+                  <CopyIcon width={22} height={20} fill="#000" />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleEdit(item)}>
+                <EditIcon width={22} height={20} fill="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => onFavorite(item)}>
+                {isFavorite ? (
+                  <LikedIcon width={22} height={20} fill="#000" />
+                ) : (
+                  <FavIcon width={22} height={20} fill="#000" />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => onShare(item, null, index)}>
+                <ShareIcon width={22} height={20} fill="#000" />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={{ width: "100%", alignItems: "center" }}>
+
+            {/* <BannerAd
+              unitId={TestIds.BANNER}
+              size={BannerAdSize.MEDIUM_RECTANGLE}
+              requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+              onAdLoaded={() => console.log('Ad Loaded')}
+              onAdFailedToLoad={(error) => console.error('Ad Load Error', error)}
+            /> */}
+            <NativeCard />
+          </View>
+        </>
+      );
+    }
     return (
       <View style={[styles.card, { backgroundColor }]}>
         <View style={styles.textWrapper}>
@@ -232,6 +281,8 @@ export default function ShayariFeedScreen() {
       </View>
     );
   };
+
+
 
   if (loading) {
     return (
@@ -321,7 +372,7 @@ export default function ShayariFeedScreen() {
                     setCustomShareModalVisible(false);
                   }}
                 >
-                  <TextIcon width={22} height={20} fill="#000" />
+                  <TextIcon width={16} height={20} fill="#000" />
                   <Text style={styles.shareButtonText}>Share Text</Text>
                 </TouchableOpacity>
 
@@ -329,7 +380,7 @@ export default function ShayariFeedScreen() {
                   style={[styles.shareButton, { gap: 7 }]}
                   onPress={shareAsImage}
                 >
-                  <Gallery width={22} height={20} fill="#000" />
+                  <Gallery width={16} height={20} fill="#000" />
                   <Text style={styles.shareButtonText}>Share Image</Text>
                 </TouchableOpacity>
               </View>
@@ -338,7 +389,7 @@ export default function ShayariFeedScreen() {
                 style={[styles.saveButton, { gap: 7 }]}
                 onPress={saveToGallery}
               >
-                <DownloadGallery width={22} height={20} fill="#000" />
+                <DownloadGallery width={16} height={20} fill="#000" />
                 <Text style={styles.shareButtonText}>Save</Text>
               </TouchableOpacity>
             </View>

@@ -25,14 +25,26 @@ import { AuthContext } from "../AuthContext";
 import ShayariCardActions from "../Action";
 import CustomShareModal from "../CustomShareModal";
 import { fontScale, scale, scaleFont } from "../Responsive";
+import {
+  BannerAd,
+  BannerAdSize,
+  RewardedAd,
+  RewardedAdEventType,
+  TestIds,
+} from 'react-native-google-mobile-ads';
+import NativeAdCard from "../NativeCardAds";
+import NativeCard from "../NativeCardAds";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 30;
 const CARD_HEIGHT = CARD_WIDTH * 0.92;
-
+const rewarded = RewardedAd.createForAdRequest(TestIds.REWARDED, {
+  requestNonPersonalizedAdsOnly: true,
+});
 export default function ShayariListScreen({ route }) {
   const cardRefs = useRef({});
-
+  const insets = useSafeAreaInsets();
   const { type, title } = route.params || {};
   const { theme } = useTheme();
   const [shayariList, setShayariList] = useState([]);
@@ -47,6 +59,56 @@ export default function ShayariListScreen({ route }) {
   const [categoryClickCount, setCategoryClickCount] = useState(0);
 
   const { userId } = useContext(AuthContext);
+
+  const [rewardLoaded, setRewardLoaded] = useState(false);
+  console.log("RewardedAdEventType", RewardedAdEventType);
+
+  useEffect(() => {
+    const unsubscribeLoaded = rewarded.addAdEventListener(
+      RewardedAdEventType.LOADED,
+      () => setRewardLoaded(true)
+    );
+
+    const unsubscribeEarned = rewarded.addAdEventListener(
+      RewardedAdEventType.EARNED_REWARD,
+      (reward) => {
+        console.log('User earned reward of ', reward);
+        // Optional: show toast or logic
+      }
+    );
+
+    // const unsubscribeClosed = rewarded.addAdEventListener(
+    //   RewardedAdEventType.CLOSED,
+    //   () => {
+    //     setRewardLoaded(false);
+    //     rewarded.load(); // Load next ad
+    //   }
+    // );
+
+    // Initial load
+    rewarded.load();
+
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeEarned();
+      // unsubscribeClosed();
+    };
+  }, [categoryClickCount]);
+  const showRewardAd = async () => {
+    if (rewardLoaded) {
+      try {
+        await rewarded.show();        // 👈 Wait for ad to close
+        setRewardLoaded(false);       // 👈 Mark ad as shown
+        rewarded.load();              // 👈 Preload next ad
+      } catch (e) {
+        console.log("Reward Ad show error:", e);
+      }
+    } else {
+      console.log("Reward ad not loaded yet, trying to load now.");
+      rewarded.load();
+    }
+  };
+
 
   useEffect(() => {
     setLoading(true);
@@ -161,10 +223,56 @@ export default function ShayariListScreen({ route }) {
     setCustomShareModalVisible(true);
   }, []);
 
-  const ShayariCard = ({ item }) => {
+  const ShayariCard = ({ item, index }) => {
     const currentRef = cardRefs.current[item._id] || React.createRef();
     cardRefs.current[item._id] = currentRef;
+    if ((index + 1) % 5 === 0) {
 
+      return (
+        <>
+          <View style={styles.cardWrapper}>
+            <View style={styles.card}>
+              <View style={styles.captureArea} collapsable={false} ref={currentRef}>
+                <ImageBackground
+                  source={require("../assets/shayaribgZoom.png")}
+                  resizeMode="cover"
+                  style={styles.imageBackground}
+                  imageStyle={{
+                    width: CARD_WIDTH,
+                    height: CARD_HEIGHT,
+                    borderRadius: 12,
+                  }}
+                >
+                  <View style={styles.content}>
+                    <Text style={styles.shayariText}>
+                      {item.text.replace(/\\n/g, "\n")}
+                    </Text>
+                  </View>
+                </ImageBackground>
+              </View>
+
+              <ShayariCardActions
+                title={route.params.title}
+                shayari={item}
+                filteredShayaris={filteredShayaris}
+                favorites={favorites} // ✅ Pass for heart icon
+                onShare={() => handleShare(item, currentRef)}
+                isCat={true}
+                onFavoriteToggle={handleRemoveFromFavorites}
+              />
+            </View>
+          </View>
+          <NativeCard />
+          {/* <BannerAd
+            unitId={TestIds.BANNER}
+            size={BannerAdSize.MEDIUM_RECTANGLE}
+            requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+            onAdLoaded={() => console.log('Ad Loaded')}
+            onAdFailedToLoad={(error) => console.error('Ad Load Error', error)}
+          /> */}
+        </>
+      );
+    };
     return (
       <View style={styles.cardWrapper}>
         <View style={styles.card}>
@@ -198,8 +306,8 @@ export default function ShayariListScreen({ route }) {
           />
         </View>
       </View>
-    );
-  };
+    )
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -233,7 +341,10 @@ export default function ShayariListScreen({ route }) {
                         console.log("Category Click Count:", newCount);
 
                         if (newCount % 4 === 0) {
-                          showAd();
+                          // showAd();
+                          console.log("Ad should be shown now");
+                          showRewardAd();
+
                         }
 
                         return newCount;
@@ -269,16 +380,48 @@ export default function ShayariListScreen({ route }) {
             />
           )}
           {filteredShayaris.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No Shayari Found</Text>
-            </View>
+            <>
+
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyText}>No Shayari Found</Text>
+              </View>
+              <View style={{ position: 'absolute', bottom: insets.bottom, left: 0, right: 0 }}>
+                <BannerAd
+                  unitId={TestIds.BANNER}
+                  size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                  requestOptions={{
+                    requestNonPersonalizedAdsOnly: true,
+                    networkExtras: {
+                      collapsible: "bottom",
+                    },
+                  }}
+                />
+              </View>
+            </>
           ) : (
-            <FlatList
-              data={filteredShayaris}
-              renderItem={({ item }) => <ShayariCard item={item} />}
-              keyExtractor={(item) => item._id}
-              contentContainerStyle={{ paddingBottom: 16 }}
-            />
+            <>
+
+              <FlatList
+                data={filteredShayaris}
+                renderItem={({ item, index }) => <ShayariCard item={item} index={index} />}
+                keyExtractor={(item) => item._id}
+                contentContainerStyle={{ paddingBottom: 16 }}
+              />
+              <View style={{ position: 'absolute', bottom: insets.bottom, left: 0, right: 0 }}>
+                <BannerAd
+                  unitId={TestIds.BANNER}
+                  size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                  requestOptions={{
+                    requestNonPersonalizedAdsOnly: true,
+                    networkExtras: {
+                      collapsible: "bottom",
+                    },
+                  }}
+                />
+              </View>
+            </>
+
+
           )}
         </>
       )}
@@ -288,25 +431,12 @@ export default function ShayariListScreen({ route }) {
         cardRef={selectedCardRef}
         shayari={selectedShayari}
       />
-      <View style={styles.bannerAdContainer}>
-        <StartAppBanner />
-      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bannerAdContainer: {
-    width: "100%",
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    backgroundColor: "#191734",
-    height: 50, // Adjust based on your ad height
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
-  },
+
 
   container: {
     flex: 1,

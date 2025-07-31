@@ -122,7 +122,17 @@ const PostSlider = () => {
       ];
 
       return (
-        <View style={cardStyle}>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate("HomeStack", {
+            screen: "ShayariFullView",
+            params: {
+              title: "My Post Shayari",
+              shayariList: shayariList,
+              shayari: item,
+              initialIndex: shayariList.findIndex((s) => s._id === item._id),
+            },
+          })
+        }} style={cardStyle}>
           <Image
             source={require("./assets/mypostbg.webp")}
             style={styles.postBackground}
@@ -131,7 +141,7 @@ const PostSlider = () => {
             <View style={styles.textWrapper}>
               <Text style={styles.postText}>{item.text}</Text>
             </View>
-            <View style={styles.actionRow}>
+            {/* <View style={styles.actionRow}>
               <TouchableOpacity onPress={() => handleCopy(item)}>
                 {isCopied ? (
                   <TickIcon width={22} height={20} fill="#000" />
@@ -152,9 +162,9 @@ const PostSlider = () => {
               <TouchableOpacity onPress={() => handleShare(item)}>
                 <ShareIcon width={22} height={20} fill="#000" />
               </TouchableOpacity>
-            </View>
+            </View> */}
           </View>
-        </View>
+        </TouchableOpacity>
       );
     },
     [copiedId, likedIds, toggleLike, handleCopy, handleShare]

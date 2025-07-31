@@ -25,11 +25,11 @@ import CustomShareModal from "../CustomShareModal";
 import { fontScale, moderateScale, scaleFont } from "../Responsive";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 10;
-const CARD_HEIGHT = SCREEN_HEIGHT * 0.6;
+const CARD_HEIGHT = SCREEN_HEIGHT * 0.57;
 
 export default function ShayariCardExact({ route }) {
   const [fontSize, setFontSize] = useState(23);
-  const [opacity, setOpacity] = useState(0.85);
+  const [opacity, setOpacity] = useState(1);
   const [fontFamily, setFontFamily] = useState("Kameron_600SemiBold");
   const [fontWeight, setFontWeight] = useState("normal"); // 'normal' or 'bold'
   const [fontStyle, setFontStyle] = useState("normal"); // 'normal' or 'italic'
@@ -40,6 +40,8 @@ export default function ShayariCardExact({ route }) {
   const [backgroundImage, setBackgroundImage] = useState(
     require("../assets/image_1.webp")
   );
+  const [uploadIconKey, setUploadIconKey] = useState(Date.now());
+
   const [favorites, setFavorites] = useState([]);
   const cardRef = useRef(null);
   const [showforSave, setshowforSave] = useState(true);
@@ -132,6 +134,7 @@ export default function ShayariCardExact({ route }) {
     } else if (itemName === "Font color") {
       setShowColorPicker(!showColorPicker);
     } else if (itemName === "Background") {
+      setUploadIconKey(Date.now());
       setShowBgPicker(!showBgPicker);
     } else if (itemName === "Background color") {
       setShowBgColorPicker(!showBgColorPicker);
@@ -245,7 +248,7 @@ export default function ShayariCardExact({ route }) {
                 <View style={styles.sliderColumn}>
                   <Slider
                     style={styles.verticalSlider}
-                    minimumValue={0.4}
+                    minimumValue={0}
                     maximumValue={1}
                     step={0.01}
                     value={opacity}
@@ -310,8 +313,8 @@ export default function ShayariCardExact({ route }) {
                   style={[
                     styles.fontItem,
                     fontWeight === "normal" &&
-                      fontStyle === "normal" &&
-                      styles.fontItemSelected,
+                    fontStyle === "normal" &&
+                    styles.fontItemSelected,
                   ]}
                   onPress={() => {
                     setFontWeight("normal");
@@ -398,10 +401,22 @@ export default function ShayariCardExact({ route }) {
                     width: 80,
                     height: 80,
                     paddingRight: 5,
+                    marginRight: 10,
+                    justifyContent: "center",
+                    alignItems: "center",
+
                   }}
                 >
-                  <UploadGallery width="100%" height="100%" />
+                  <View style={{ width: 80, height: 80 }}>
+                    {/* <UploadGallery
+                      width="100%"
+                      height="100%"
+                      key={uploadIconKey}
+                    /> */}
+                    <Image source={require('../assets/upload.png')} style={{ width: "100%", height: "100%" }} />
+                  </View>
                 </TouchableOpacity>
+
                 {/* Predefined background images */}
                 {[
                   require("../assets/image_1.webp"),
@@ -415,9 +430,9 @@ export default function ShayariCardExact({ route }) {
                   require("../assets/image_9.webp"),
                   require("../assets/image_10.webp"),
                   require("../assets/image_11.webp"),
-                  require("../assets/image_12.webp"),
+                  // require("../assets/image_12.webp"),
                   require("../assets/image_13.webp"),
-                  require("../assets/image_14.webp"),
+                  // require("../assets/image_14.webp"),
                 ].map((img, index) => (
                   <TouchableOpacity
                     key={index}
@@ -603,7 +618,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   gridItem: {
-    width: (SCREEN_WIDTH - 90) / 3,
+    width: (SCREEN_WIDTH - 70) / 3,
     aspectRatio: 1.25,
     justifyContent: "center",
     alignItems: "center",

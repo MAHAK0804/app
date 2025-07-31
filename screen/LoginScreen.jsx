@@ -27,15 +27,14 @@ export default function LoginScreen() {
     validationSchema: Yup.object({
       name: Yup.string().required("Name is required"),
       phone: Yup.string()
-        .required("Phone or Email is required")
+        .required("Email is required")
         .test(
-          "is-valid-phone-or-email",
-          "Enter a valid phone number or email",
+          "is-valid-email",
+          "Enter a valid email",
           function (value) {
-            const phoneRegex = /^[0-9]{10}$/;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-            return phoneRegex.test(value) || emailRegex.test(value);
+            return emailRegex.test(value);
           }
         ),
       agree: Yup.bool().oneOf([true], "You must accept Terms & Conditions"),
@@ -44,7 +43,6 @@ export default function LoginScreen() {
       const { phone } = values;
 
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(phone);
-      const isPhone = /^[0-9]{10}$/.test(phone);
 
       try {
         let response;
@@ -63,21 +61,10 @@ export default function LoginScreen() {
             name: values.name,
             email: values.phone,
           });
-        } else if (isPhone) {
-          response = await axios.post(
-            "https://hindishayari.onrender.com/api/users/auth/request-otp",
-            {
-              name: values.name,
-              phone: values.phone,
-            }
-          );
-
-          await AsyncStorage.setItem("otp", response.data.data.user.otp);
-          navigation.replace("VerifyOTPScreen", {
-            name: values.name,
-            phone: values.phone,
-          });
         }
+
+
+
 
         console.log("Login Response:", response.data);
       } catch (error) {
@@ -127,10 +114,10 @@ export default function LoginScreen() {
             fontSize: fontScale * scaleFont(16),
           }}
         >
-          Phone no. / E-mail
+          E-mail ID
         </Text>
         <TextInput
-          placeholder="Phone no. / E-mail*"
+          placeholder="E-mail ID*"
           placeholderTextColor="#ccc"
           value={formik.values.phone}
           onChangeText={formik.handleChange("phone")}

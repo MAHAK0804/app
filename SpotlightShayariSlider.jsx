@@ -14,10 +14,13 @@ import {
   StyleSheet,
   Animated,
   PixelRatio,
+  ImageBackground,
+  TouchableOpacity,
 } from "react-native";
-import { moderateScale, scale, scaleFont, verticalScale } from "./Responsive";
+import { moderateScale, scale, scaleFont } from "./Responsive";
 import ShayariCardActions from "./Action";
 import CustomShareModal from "./CustomShareModal";
+import { useNavigation } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
@@ -40,13 +43,11 @@ export default function ShayariSpotlightSlider({
     setCustomShareModalVisible(true);
   }, []);
 
-  // Fetch new random shayaris
   const refreshShayaris = useCallback(async () => {
     try {
       if (typeof fetchNewShayaris === "function") {
         const newData = await fetchNewShayaris();
-        const shuffled = newData.sort(() => 0.5 - Math.random());
-        const topThree = shuffled.slice(0, 3);
+        const topThree = newData.slice(0, 3);
         setLatestShayaris(topThree);
         setCurrentIndex(0);
         flatListRef.current?.scrollToIndex({ index: 0, animated: false });
@@ -56,32 +57,50 @@ export default function ShayariSpotlightSlider({
     }
   }, [fetchNewShayaris]);
 
+  // Auto-scroll every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      const nextIndex = currentIndex + 1;
+      if (latestShayaris.length === 0) return;
 
-      if (nextIndex < latestShayaris.length) {
-        setCurrentIndex(nextIndex);
-        flatListRef.current?.scrollToIndex({
-          index: nextIndex,
-          animated: true,
-        });
-      } else {
-        refreshShayaris(); // After last card, fetch new random
+      let nextIndex = currentIndex + 1;
+      if (nextIndex >= latestShayaris.length) {
+        refreshShayaris();
+        return;
       }
+
+      setCurrentIndex(nextIndex);
+      flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
     }, 3000);
 
     return () => clearInterval(interval);
   }, [currentIndex, latestShayaris.length, refreshShayaris]);
+  const navigation = useNavigation();
+
+  // Handle scroll event manually to keep track of current index
+  const onScrollEnd = useCallback((e) => {
+    const contentOffsetX = e.nativeEvent.contentOffset.x;
+    const index = Math.round(contentOffsetX / width);
+    setCurrentIndex(index);
+  }, []);
 
   const renderItem = ({ item }) => {
     const currentRef = cardRefs.current[item._id] || React.createRef();
     cardRefs.current[item._id] = currentRef;
 
     return (
-      <View style={styles.card}>
+      <TouchableOpacity onPress={(item) => {
+        navigation.navigate("HomeStack", {
+          screen: "ShayariFullView",
+          params: {
+            title: "Spotlight Shayari",
+            shayariList: latestShayaris,
+            shayari: item,
+            initialIndex: latestShayaris.findIndex((s) => s._id === item._id),
+          },
+        })
+      }} style={styles.card}>
         <Image
-          source={require("./assets/Rectangle 22.png")}
+          source={require("./assets/spotlight.webp")}
           style={styles.bgImage}
         />
         <View style={styles.absoluteContent}>
@@ -92,18 +111,20 @@ export default function ShayariSpotlightSlider({
             </Text>
           </View>
           <View style={{ marginBottom: 11, marginRight: 12 }}>
-            <ShayariCardActions
+            {/* <ShayariCardActions
               title="SpotLight Shayaris"
               shayari={item}
               filteredShayaris={latestShayaris}
               onShare={() => handleShare(item, currentRef)}
               isSpotlightScreen={true}
-            />
+            /> */}
           </View>
         </View>
-      </View>
+
+      </TouchableOpacity>
     );
   };
+
 
   if (!latestShayaris.length) return null;
 
@@ -121,15 +142,16 @@ export default function ShayariSpotlightSlider({
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
           { useNativeDriver: true }
         )}
+        onMomentumScrollEnd={onScrollEnd}
         initialNumToRender={3}
         maxToRenderPerBatch={3}
+        showsHorizontalScrollIndicator={false}
       />
 
       {/* Pagination Dots */}
       <View style={styles.pagination}>
         {latestShayaris.map((_, i) => {
           const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
-
           const dotOpacity = scrollX.interpolate({
             inputRange,
             outputRange: [0.3, 1, 0.3],
@@ -145,30 +167,32 @@ export default function ShayariSpotlightSlider({
         })}
       </View>
 
-      <CustomShareModal
+      {/* <CustomShareModal
         visible={customShareModalVisible}
         onClose={() => setCustomShareModalVisible(false)}
         cardRef={selectedCardRef}
         shayari={selectedShayari}
-      />
+      /> */}
     </View>
   );
 }
-const fontScale = PixelRatio.getFontScale(); // Usually 1.0, 1.2, 1.5, etc.
-const baseFontSize = scaleFont(21); // You already use this as base
+
+const fontScale = PixelRatio.getFontScale();
+const baseFontSize = scaleFont(21);
 const dynamicFontSize = baseFontSize * fontScale;
-const dynamicCardHeight = dynamicFontSize * 9.6;
+const dynamicCardHeight = dynamicFontSize * 12;
 
 const styles = StyleSheet.create({
   card: {
     width: scale(350),
     // height: dynamicCardHeight,
-    minHeight: dynamicCardHeight,
+    height: dynamicCardHeight,
     borderRadius: 18,
     // overflow: "hidden",
     // marginBottom: 10,
     marginHorizontal: 15,
   },
+
   bgImage: {
     ...StyleSheet.absoluteFillObject,
     resizeMode: "cover",

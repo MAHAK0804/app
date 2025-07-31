@@ -42,8 +42,8 @@ export default function ShayariCardActions({
   const handleCopy = async () => {
     await Clipboard.setStringAsync(shayari.text);
     setCopied(true);
-    Toast.show("Copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
+    // Toast.show("Copied to clipboard!");
+    // setTimeout(() => setCopied(false), 2000);
   };
 
   const checkIsFav = async () => {
@@ -80,10 +80,18 @@ export default function ShayariCardActions({
   };
 
   const handleEdit = () => {
-    navigation.navigate("HomeStack", {
-      screen: "ShayariEditScreen",
-      params: { shayari },
-    });
+    if (title === "My Post Shayari") {
+      navigation.navigate("Writeshayari", {
+        shayari: shayari,
+      });
+    }
+    else {
+
+      navigation.navigate("HomeStack", {
+        screen: "ShayariEditScreen",
+        params: { shayari },
+      });
+    }
   };
 
   const handleExpand = () => {
