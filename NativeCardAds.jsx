@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, Image, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import {
+    Text,
+    View,
+    Image,
+    StyleSheet,
+    TouchableOpacity,
+    Linking,
+    ActivityIndicator,
+} from 'react-native';
 import {
     NativeAd,
     NativeAdView,
@@ -9,6 +17,7 @@ import {
 
 export default function NativeCard() {
     const [nativeAd, setNativeAd] = useState(null);
+    const [loading, setLoading] = useState(true); // 🔄 Add loading state
 
     useEffect(() => {
         MobileAds().initialize();
@@ -19,6 +28,8 @@ export default function NativeCard() {
                 setNativeAd(ad);
             } catch (e) {
                 console.error('Failed to load ad:', e);
+            } finally {
+                setLoading(false); // ✅ Stop loading whether success or error
             }
         };
 
@@ -27,11 +38,18 @@ export default function NativeCard() {
 
     const handleCTAPress = () => {
         if (nativeAd?.callToAction) {
-            // Most ads redirect to Play Store, but for test ads there's no real link.
-            const storeUrl = `https://play.google.com/store`; // fallback
+            const storeUrl = `https://play.google.com/store`;
             Linking.openURL(storeUrl).catch(err => console.error("Failed to open URL:", err));
         }
     };
+
+    if (loading) {
+        return (
+            <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color="#190b5fff" />
+            </View>
+        );
+    }
 
     if (!nativeAd) return null;
 
@@ -56,7 +74,6 @@ export default function NativeCard() {
                     <Text style={styles.advertiser}>By: {nativeAd.advertiser}</Text>
                 )}
 
-                {/* Manual CTA button */}
                 {nativeAd.callToAction && (
                     <TouchableOpacity style={styles.ctaButton} onPress={handleCTAPress}>
                         <Text style={styles.ctaText}>{nativeAd.callToAction}</Text>
@@ -122,5 +139,16 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    loaderContainer: {
+        width: '95%',
+        alignSelf: 'center',
+        padding: 20,
+        marginVertical: 10,
+        borderRadius: 30,
+        backgroundColor: 'transparent',
+        elevation: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

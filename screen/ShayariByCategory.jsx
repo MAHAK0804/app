@@ -1,11 +1,10 @@
 // ShayariListScreen.js
 import React, {
   useCallback,
-  useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
+  useContext,
 } from "react";
 import {
   View,
@@ -16,7 +15,6 @@ import {
   ActivityIndicator,
   ImageBackground,
   Dimensions,
-  NativeModules,
 } from "react-native";
 import { useTheme } from "../ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -31,8 +29,7 @@ import {
   RewardedAd,
   RewardedAdEventType,
   TestIds,
-} from 'react-native-google-mobile-ads';
-import NativeAdCard from "../NativeCardAds";
+} from "react-native-google-mobile-ads";
 import NativeCard from "../NativeCardAds";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -42,14 +39,24 @@ const CARD_HEIGHT = CARD_WIDTH * 0.92;
 const rewarded = RewardedAd.createForAdRequest(TestIds.REWARDED, {
   requestNonPersonalizedAdsOnly: true,
 });
+
+const API_URL = "https://hindishayari.onrender.com/api";
+const ITEMS_PER_PAGE = 6;
+
 export default function ShayariListScreen({ route }) {
   const cardRefs = useRef({});
   const insets = useSafeAreaInsets();
-  const { type, title } = route.params || {};
+  const { type } = route.params || {};
   const { theme } = useTheme();
+
   const [shayariList, setShayariList] = useState([]);
-  const [favorites, setFavorites] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  const [favorites, setFavorites] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
@@ -59,108 +66,105 @@ export default function ShayariListScreen({ route }) {
   const [categoryClickCount, setCategoryClickCount] = useState(0);
 
   const { userId } = useContext(AuthContext);
-
   const [rewardLoaded, setRewardLoaded] = useState(false);
-  console.log("RewardedAdEventType", RewardedAdEventType);
 
+  const rewardedAdRef = useRef(null);
+
+  // --- REWARDED AD LOGIC ---
   useEffect(() => {
-    const unsubscribeLoaded = rewarded.addAdEventListener(
+    rewardedAdRef.current = rewarded;
+    const unsubscribeLoaded = rewardedAdRef.current.addAdEventListener(
       RewardedAdEventType.LOADED,
       () => setRewardLoaded(true)
     );
-
-    const unsubscribeEarned = rewarded.addAdEventListener(
+    const unsubscribeEarned = rewardedAdRef.current.addAdEventListener(
       RewardedAdEventType.EARNED_REWARD,
-      (reward) => {
-        console.log('User earned reward of ', reward);
-        // Optional: show toast or logic
-      }
+      (reward) => console.log("User earned reward of ", reward)
     );
 
-    // const unsubscribeClosed = rewarded.addAdEventListener(
-    //   RewardedAdEventType.CLOSED,
-    //   () => {
-    //     setRewardLoaded(false);
-    //     rewarded.load(); // Load next ad
-    //   }
-    // );
-
-    // Initial load
-    rewarded.load();
-
+    rewardedAdRef.current.load();
     return () => {
       unsubscribeLoaded();
       unsubscribeEarned();
-      // unsubscribeClosed();
     };
-  }, [categoryClickCount]);
+  }, []);
+
   const showRewardAd = async () => {
     if (rewardLoaded) {
       try {
-        await rewarded.show();        // 👈 Wait for ad to close
-        setRewardLoaded(false);       // 👈 Mark ad as shown
-        rewarded.load();              // 👈 Preload next ad
+        await rewardedAdRef.current.show();
       } catch (e) {
         console.log("Reward Ad show error:", e);
       }
     } else {
       console.log("Reward ad not loaded yet, trying to load now.");
-      rewarded.load();
     }
   };
 
+  // --- DATA FETCHING LOGIC ---
 
-  useEffect(() => {
-    setLoading(true);
+  const fetchShayaris = useCallback(
+    async (pageNum, categoryId, isInitialFetch = false) => {
+      if (isFetchingMore && !isInitialFetch) return;
+      console.log(categoryId);
 
-    if (type === "all") {
-      fetchAllShayaris();
-      fetchCategories();
-    } else if (type === "mine") {
-      fetchMyShayaris();
-    } else if (type === "category" && route.params?.categoryId) {
-      fetchCategoryShayaris(route.params.categoryId);
-    } else if (type === "favorites") {
-      fetchFavoritesList();
-    }
+      if (isInitialFetch) {
+        setInitialLoading(true);
+        setShayariList([]);
+        setPage(1);
+        setHasMore(true);
+      } else if (!hasMore) {
+        return;
+      }
+      setIsFetchingMore(true);
 
-    loadFavorites(); // Always load favorites for heart icon
-  }, [type, route.params?.categoryId]);
+      try {
+        const categoryQuery = categoryId && categoryId !== "All" ? `&category=${categoryId}` : "";
+        const res = await axios.get(
+          `${API_URL}/shayaris?page=${pageNum}&limit=${ITEMS_PER_PAGE}${categoryQuery}`
+        );
 
-  const fetchAllShayaris = async () => {
-    try {
-      const res = await axios.get(
-        "https://hindishayari.onrender.com/api/shayaris"
-      );
-      setShayariList(res.data);
-    } catch (error) {
-      console.log("Error fetching all shayaris:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const newShayaris = res.data.shayaris || [];
+        setShayariList((prev) =>
+          isInitialFetch ? newShayaris : [...prev, ...newShayaris]
+        );
+        setHasMore(newShayaris.length === ITEMS_PER_PAGE);
+        setPage(pageNum);
+      } catch (error) {
+        console.error("Error fetching shayaris ->", error);
+        setHasMore(false);
+      } finally {
+        setInitialLoading(false);
+        setIsFetchingMore(false);
+        setLoading(false);
+      }
+    },
+    [isFetchingMore, hasMore]
+  );
 
   const fetchMyShayaris = async () => {
+    setInitialLoading(true);
     try {
-      const res = await axios.get(
-        "https://hindishayari.onrender.com/api/users/shayaris/all"
-      );
-      setShayariList(res.data.filter((el) => el.userId._id == userId));
+      const res = await axios.get(`${API_URL}/users/shayaris/all`);
+      setShayariList(res.data.filter((el) => el.userId._id === userId));
     } catch (error) {
-      console.log("Error fetching shayaris ->", error);
+      console.error("Error fetching my shayaris ->", error);
     } finally {
+      setInitialLoading(false);
       setLoading(false);
     }
   };
 
   const fetchFavoritesList = async () => {
+    setInitialLoading(true);
     try {
       const stored = await AsyncStorage.getItem("favorites");
       const parsed = stored ? JSON.parse(stored) : [];
       setShayariList(parsed);
     } catch (e) {
-      console.log("Failed to load favorites list", e);
+      console.error("Failed to load favorites list", e);
     } finally {
+      setInitialLoading(false);
       setLoading(false);
     }
   };
@@ -169,53 +173,67 @@ export default function ShayariListScreen({ route }) {
     try {
       const stored = await AsyncStorage.getItem("favorites");
       const parsed = stored ? JSON.parse(stored) : [];
-      setFavorites(parsed); // Only for heart icon state
+      setFavorites(parsed);
     } catch (e) {
-      console.log("Failed to load favorites", e);
+      console.error("Failed to load favorites", e);
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(
-        "https://hindishayari.onrender.com/api/categories"
-      );
-      const reversed = res.data.reverse();
-      setCategories(reversed);
+      const res = await axios.get(`${API_URL}/categories`);
+      setCategories(res.data.reverse());
     } catch (error) {
-      console.log("Error fetching categories:", error);
-    }
-  };
-  const handleRemoveFromFavorites = (shayariId) => {
-    if (type === "favorites") {
-      setShayariList((prev) => prev.filter((item) => item._id !== shayariId));
-    }
-
-    // Also update heart icon state
-    setFavorites((prev) => prev.filter((item) => item._id !== shayariId));
-  };
-
-  const fetchCategoryShayaris = async (categoryId) => {
-    try {
-      const res = await axios.get(
-        "https://hindishayari.onrender.com/api/shayaris"
-      );
-      const filtered = res.data.filter(
-        (item) => item.categoryId === categoryId
-      );
-      setShayariList(filtered);
-    } catch (error) {
-      console.log("Error fetching category shayaris:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error fetching categories:", error);
     }
   };
 
-  const filteredShayaris = useMemo(() => {
-    if (type !== "all") return shayariList;
-    if (selectedCategory === "All") return shayariList;
-    return shayariList.filter((item) => item.categoryId === selectedCategory);
-  }, [shayariList, selectedCategory, type]);
+  // --- USEEFFECT HOOKS ---
+
+  useEffect(() => {
+    loadFavorites();
+    if (type === "all") {
+      fetchCategories();
+      // Initial fetch for "All" category, using server-side filtering
+      fetchShayaris(1, "All", true);
+    } else if (type === "mine") {
+      fetchMyShayaris();
+    } else if (type === "favorites") {
+      fetchFavoritesList();
+    } else if (type === "category" && route.params?.categoryId) {
+      // Fetch for a specific category passed from the route
+      fetchShayaris(1, route.params.categoryId, true);
+      setSelectedCategory(route.params.categoryId);
+    }
+  }, [type, route.params?.categoryId]);
+
+  // This useEffect now runs only when a new category is selected on the "All" screen.
+  // It triggers a fresh API call for that category's data.
+  useEffect(() => {
+    if (type === "all") {
+      fetchShayaris(1, selectedCategory, true);
+    }
+  }, [selectedCategory, type]);
+
+  // --- HANDLERS ---
+
+  const handleLoadMore = () => {
+    if (hasMore && !isFetchingMore && !initialLoading) {
+      fetchShayaris(page + 1, selectedCategory, false);
+    }
+  };
+
+  const handleCategoryChange = (categoryId) => {
+    const newCategory = categoryId === "all" ? "All" : categoryId;
+    setSelectedCategory(newCategory);
+    setCategoryClickCount((prev) => {
+      const newCount = prev + 1;
+      if (newCount % 3 === 0) {
+        showRewardAd();
+      }
+      return newCount;
+    });
+  };
 
   const handleShare = useCallback((item, ref) => {
     setSelectedShayari(item);
@@ -223,208 +241,151 @@ export default function ShayariListScreen({ route }) {
     setCustomShareModalVisible(true);
   }, []);
 
+  const handleRemoveFromFavorites = (shayariId) => {
+    if (type === "favorites") {
+      setShayariList((prev) => prev.filter((item) => item._id !== shayariId));
+    }
+    setFavorites((prev) => prev.filter((item) => item._id !== shayariId));
+  };
+
+  // --- SHAYARI CARD COMPONENT ---
   const ShayariCard = ({ item, index }) => {
     const currentRef = cardRefs.current[item._id] || React.createRef();
     cardRefs.current[item._id] = currentRef;
-    if ((index + 1) % 5 === 0) {
+    console.log(item);
 
-      return (
-        <>
-          <View style={styles.cardWrapper}>
-            <View style={styles.card}>
-              <View style={styles.captureArea} collapsable={false} ref={currentRef}>
-                <ImageBackground
-                  source={require("../assets/shayaribgZoom.png")}
-                  resizeMode="cover"
-                  style={styles.imageBackground}
-                  imageStyle={{
-                    width: CARD_WIDTH,
-                    height: CARD_HEIGHT,
-                    borderRadius: 12,
-                  }}
-                >
-                  <View style={styles.content}>
-                    <Text style={styles.shayariText}>
-                      {item.text.replace(/\\n/g, "\n")}
-                    </Text>
-                  </View>
-                </ImageBackground>
-              </View>
-
-              <ShayariCardActions
-                title={route.params.title}
-                shayari={item}
-                filteredShayaris={filteredShayaris}
-                favorites={favorites} // ✅ Pass for heart icon
-                onShare={() => handleShare(item, currentRef)}
-                isCat={true}
-                onFavoriteToggle={handleRemoveFromFavorites}
-              />
-            </View>
-          </View>
-          <NativeCard />
-          {/* <BannerAd
-            unitId={TestIds.BANNER}
-            size={BannerAdSize.MEDIUM_RECTANGLE}
-            requestOptions={{ requestNonPersonalizedAdsOnly: true }}
-            onAdLoaded={() => console.log('Ad Loaded')}
-            onAdFailedToLoad={(error) => console.error('Ad Load Error', error)}
-          /> */}
-        </>
-      );
-    };
     return (
-      <View style={styles.cardWrapper}>
-        <View style={styles.card}>
-          <View style={styles.captureArea} collapsable={false} ref={currentRef}>
-            <ImageBackground
-              source={require("../assets/shayaribgZoom.png")}
-              resizeMode="cover"
-              style={styles.imageBackground}
-              imageStyle={{
-                width: CARD_WIDTH,
-                height: CARD_HEIGHT,
-                borderRadius: 12,
-              }}
-            >
-              <View style={styles.content}>
-                <Text style={styles.shayariText}>
-                  {item.text.replace(/\\n/g, "\n")}
-                </Text>
-              </View>
-            </ImageBackground>
+      <>
+        <View style={styles.cardWrapper}>
+          <View style={styles.card}>
+            <View style={styles.captureArea} collapsable={false} ref={currentRef}>
+              <ImageBackground
+                source={require("../assets/shayaribgZoom.png")}
+                resizeMode="cover"
+                style={styles.imageBackground}
+                imageStyle={{
+                  width: CARD_WIDTH,
+                  height: CARD_HEIGHT,
+                  borderRadius: 12,
+                }}
+              >
+                <View style={styles.content}>
+                  <Text style={styles.shayariText}>
+                    {item.text.replace(/\\n/g, "\n")}
+                  </Text>
+                </View>
+              </ImageBackground>
+            </View>
+            <ShayariCardActions
+              title={item.title}
+              shayari={item}
+              favorites={favorites}
+              onShare={() => handleShare(item, currentRef)}
+              onFavoriteToggle={handleRemoveFromFavorites}
+              filteredShayaris={shayariList}
+            />
           </View>
-
-          <ShayariCardActions
-            title={route.params.title}
-            shayari={item}
-            filteredShayaris={filteredShayaris}
-            favorites={favorites} // ✅ Pass for heart icon
-            onShare={() => handleShare(item, currentRef)}
-            isCat={true}
-            onFavoriteToggle={handleRemoveFromFavorites}
-          />
         </View>
-      </View>
-    )
-  }
+        {((index + 1) % 5 === 0) && (
+          <NativeCard />
+        )}
+      </>
+    );
+  };
 
+  // --- RENDER ---
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {loading ? (
+      {type === "all" && (
+        <FlatList
+          data={[{ _id: "all", title: "All" }, ...categories]}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          renderItem={({ item }) => {
+            const isActive =
+              (item._id === "all" && selectedCategory === "All") ||
+              selectedCategory === item._id;
+            return (
+              <TouchableOpacity
+                onPress={() => handleCategoryChange(item._id)}
+                style={{
+                  paddingHorizontal: 14,
+                  height: 36,
+                  borderRadius: 20,
+                  marginHorizontal: 4,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderWidth: 1,
+                  borderColor: isActive ? "#fff" : "#191734",
+                  backgroundColor: "#191734",
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontWeight: "normal",
+                    fontSize: fontScale * scaleFont(13),
+                    fontFamily: "Kameron_400Regular",
+                    textAlignVertical: "center",
+                    includeFontPadding: false,
+                  }}
+                >
+                  {item.title}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      )}
+
+      {initialLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4E47A7" />
         </View>
       ) : (
         <>
-          {type === "all" && (
+          {shayariList.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyText}>No Shayari Found</Text>
+            </View>
+          ) : (
             <FlatList
-              data={[{ _id: "all", title: "All" }, ...categories]}
-              horizontal
-              showsHorizontalScrollIndicator={false}
+              data={shayariList}
+              renderItem={({ item, index }) => (
+                <ShayariCard item={item} index={index} />
+              )}
               keyExtractor={(item) => item._id}
-              contentContainerStyle={{ paddingBottom: 20 }}
-              renderItem={({ item }) => {
-                const isActive =
-                  (item._id === "all" && selectedCategory === "All") ||
-                  selectedCategory === item._id;
-
-                return (
-                  <TouchableOpacity
-                    onPress={() => {
-                      const isAll = item._id === "all";
-                      const newCategory = isAll ? "All" : item._id;
-                      setSelectedCategory(newCategory);
-
-                      setCategoryClickCount((prev) => {
-                        const newCount = prev + 1;
-                        console.log("Category Click Count:", newCount);
-
-                        if (newCount % 4 === 0) {
-                          // showAd();
-                          console.log("Ad should be shown now");
-                          showRewardAd();
-
-                        }
-
-                        return newCount;
-                      });
-                    }}
-                    style={{
-                      paddingHorizontal: 14,
-                      height: 36,
-                      borderRadius: 20,
-                      marginHorizontal: 4,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderWidth: 1,
-                      borderColor: isActive ? "#fff" : "#191734",
-                      backgroundColor: "#191734",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "#fff",
-                        fontWeight: "normal",
-                        fontSize: fontScale * scaleFont(13),
-                        fontFamily: "Kameron_400Regular",
-                        textAlignVertical: "center",
-                        includeFontPadding: false,
-                      }}
-                    >
-                      {item.title}
-                    </Text>
-                  </TouchableOpacity>
-                );
+              onEndReached={handleLoadMore}
+              onEndReachedThreshold={0.7}
+              ListFooterComponent={() =>
+                isFetchingMore ? (
+                  <ActivityIndicator size="small" color="#999" style={{ marginVertical: 20 }} />
+                ) : null
+              }
+              contentContainerStyle={{
+                paddingHorizontal: scale(10),
+                paddingBottom: insets.bottom + 60,
               }}
             />
           )}
-          {filteredShayaris.length === 0 ? (
-            <>
-
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No Shayari Found</Text>
-              </View>
-              <View style={{ position: 'absolute', bottom: insets.bottom, left: 0, right: 0 }}>
-                <BannerAd
-                  unitId={TestIds.BANNER}
-                  size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                  requestOptions={{
-                    requestNonPersonalizedAdsOnly: true,
-                    networkExtras: {
-                      collapsible: "bottom",
-                    },
-                  }}
-                />
-              </View>
-            </>
-          ) : (
-            <>
-
-              <FlatList
-                data={filteredShayaris}
-                renderItem={({ item, index }) => <ShayariCard item={item} index={index} />}
-                keyExtractor={(item) => item._id}
-                contentContainerStyle={{ paddingBottom: 16 }}
-              />
-              <View style={{ position: 'absolute', bottom: insets.bottom, left: 0, right: 0 }}>
-                <BannerAd
-                  unitId={TestIds.BANNER}
-                  size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                  requestOptions={{
-                    requestNonPersonalizedAdsOnly: true,
-                    networkExtras: {
-                      collapsible: "bottom",
-                    },
-                  }}
-                />
-              </View>
-            </>
-
-
-          )}
         </>
       )}
+
+      <View style={{ position: "absolute", bottom: insets.bottom, left: 0, right: 0 }}>
+        <BannerAd
+          unitId={TestIds.BANNER}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true,
+            networkExtras: {
+              collapsible: "bottom",
+            },
+          }}
+        />
+      </View>
+
       <CustomShareModal
         visible={customShareModalVisible}
         onClose={() => setCustomShareModalVisible(false)}
@@ -436,19 +397,16 @@ export default function ShayariListScreen({ route }) {
 }
 
 const styles = StyleSheet.create({
-
-
   container: {
     flex: 1,
     paddingHorizontal: 12,
     paddingTop: 12,
-    paddingBottom: scale(35),
+    paddingBottom: scale(75),
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000", // Optional: dynamic from theme
   },
   cardWrapper: {
     width: CARD_WIDTH,

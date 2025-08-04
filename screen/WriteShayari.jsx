@@ -11,6 +11,8 @@ import {
   Share,
   TextInput,
   Keyboard,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import * as Sharing from "expo-sharing";
@@ -23,23 +25,21 @@ import {
   useFocusEffect,
   useNavigation,
 } from "@react-navigation/native";
-import WheelColorPicker from "react-native-wheel-color-picker";
-import * as ImagePicker from "expo-image-picker";
 import { captureRef } from "react-native-view-shot";
 import * as MediaLibrary from "expo-media-library";
 import { Alert, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-root-toast";
 import axios from "axios";
-import EditIcon from "../assets/whiteedit.svg";
 import CustomAlert from "../CustomAlert";
-import CopyIcon from "../assets/copyWhite.svg";
-import FavIcon from "../assets/heartWhite.svg";
-import ShareIcon from "../assets/shareWhite.svg";
+import CopyIcon from "../assets/copy.svg";
+import FavIcon from "../assets/favourite ( stroke ).svg";
+import ShareIcon from "../assets/share.svg";
 import TickIcon from "../assets/tick.svg";
 import LikedIcon from "../assets/heart.svg";
 import { AuthContext } from "../AuthContext";
-import { fontScale, scaleFont } from "../Responsive";
+import { fontScale, moderateScale, scale, scaleFont, verticalScale } from "../Responsive";
+import NativeCard from "../NativeCardAds";
 const { width } = Dimensions.get("window");
 
 export default function WriteShayari({ route }) {
@@ -110,7 +110,7 @@ export default function WriteShayari({ route }) {
       );
       return;
     }
-    setshowforSave(true);
+    // setshowforSave(true);
     setSelectedCardRef(cardRef);
     setCustomShareModalVisible(true);
   }, [shayariText]);
@@ -243,227 +243,238 @@ export default function WriteShayari({ route }) {
   const textOpacity = shayariText.trim() === "" ? 0.5 : opacity;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.customHeader}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Home")}
-          style={styles.headerIcon}
-        >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>Write Your Shayari</Text>
-
-        <TouchableOpacity
-          onPress={async () => {
-            if (shayariText.trim() === "") {
-              showCustomAlert(
-                "Empty Shayari",
-                "Please write something before posting!"
-              );
-              return;
-            }
-
-            try {
-              if (shayari?._id) {
-                // 🔁 Update existing Shayari
-                await axios.put(
-                  `https://hindishayari.onrender.com/api/users/shayaris/update/${shayari._id}`,
-                  { userId, text: shayariText }
-                );
-                showCustomAlert("Updated", "Your Shayari has been updated!");
-              } else {
-                // 🆕 Post new Shayari
-                await axios.post(
-                  "https://hindishayari.onrender.com/api/users/shayaris/add",
-                  { userId, text: shayariText }
-                );
-                showCustomAlert("Posted", "Your Shayari has been submitted!");
-              }
-
-              // ✅ Reset state and navigate
-              setIsEditing(false);
-              setShayariText("");
-              navigation.dispatch(
-                CommonActions.reset({
-                  index: 0,
-                  routes: [{ name: "HomeScreen" }],
-                })
-              );
-            } catch (error) {
-              console.log("Shayari save error:", error);
-              showCustomAlert("Error", "Failed to save Shayari.");
-            }
-          }}
-          style={styles.headerIcon}
-        >
-          <TickIcon width={22} height={20} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Shayari Card Row */}
-      <View style={styles.cardRow}>
-        <View ref={cardRef} collapsable={false}>
-          <CustomAlert
-            visible={customAlertVisible}
-            title={alertTitle}
-            message={alertMessage}
-            onClose={() => setCustomAlertVisible(false)}
-          />
-
-          <ImageBackground
-            source={backgroundImage}
-            imageStyle={styles.imageBorder}
-            style={[
-              styles.backgroundCard,
-              backgroundColor && { backgroundColor },
-            ]}
-            resizeMode="cover"
-          >
-            <View style={styles.innerRow}>
-              {/* Shayari Text - Now Editable */}
-              <TouchableOpacity
-                style={styles.textWrapper}
-                onPress={handleCardTap}
-                activeOpacity={0.8}
-              >
-                {isEditing ? (
-                  <TextInput
-                    style={[
-                      styles.shayariText,
-                      styles.textInput,
-                      {
-                        fontSize,
-                        opacity,
-                        fontFamily,
-                        fontWeight,
-                        fontStyle,
-                        color: fontColor,
-                        textAlign,
-                      },
-                    ]}
-                    value={shayariText}
-                    onChangeText={setShayariText}
-                    multiline={true}
-                    placeholder="Write your shayari here..."
-                    placeholderTextColor={`${fontColor}80`}
-                    onBlur={handleTextSubmit}
-                    autoFocus={true}
-                    textAlignVertical="center"
-                  />
-                ) : (
-                  <Text
-                    style={[
-                      styles.shayariText,
-                      {
-                        fontSize,
-                        opacity: textOpacity,
-                        fontFamily,
-                        fontWeight,
-                        fontStyle,
-                        color: fontColor,
-                        textAlign,
-                      },
-                    ]}
-                  >
-                    {displayText}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </ImageBackground>
-        </View>
-      </View>
-
-      {/* Share Modal */}
-      {customShareModalVisible && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <View style={styles.customHeader}>
             <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setCustomShareModalVisible(false)}
+              onPress={() => navigation.navigate("Home")}
+              style={styles.headerIcon}
             >
-              <Ionicons name="close" size={22} color="#333" />
+              <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
 
-            <View style={styles.previewBox} />
+            <Text style={styles.headerTitle}>Write Your Shayari</Text>
 
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={styles.shareButton}
-                onPress={() => {
-                  Share.share({
-                    message: shayariText.replace(/\\n/g, "\n"),
-                  });
-                  setCustomShareModalVisible(false);
-                }}
-              >
-                <WhiteText width={18} height={18} />
-                <Text style={styles.shareButtonText}>Share Text</Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                if (shayariText.trim() === "") {
+                  showCustomAlert(
+                    "Empty Shayari",
+                    "Please write something before posting!"
+                  );
+                  return;
+                }
 
-              <TouchableOpacity
-                style={styles.shareButton}
-                onPress={shareAsImage}
-              >
-                <Ionicons
-                  name="image-outline"
-                  size={18}
-                  color="#fff"
-                  style={{ marginRight: 6 }}
-                />
-                <Text style={styles.shareButtonText}>Share Image</Text>
-              </TouchableOpacity>
-            </View>
+                try {
+                  if (shayari?._id) {
+                    // 🔁 Update existing Shayari
+                    await axios.put(
+                      `https://hindishayari.onrender.com/api/users/shayaris/update/${shayari._id}`,
+                      { userId, text: shayariText }
+                    );
+                    showCustomAlert("Updated", "Thank You! Your Shayari has been successfully saved in My Shayari.");
+                  } else {
+                    // 🆕 Post new Shayari
+                    await axios.post(
+                      "https://hindishayari.onrender.com/api/users/shayaris/add",
+                      { userId, text: shayariText }
+                    );
+                    showCustomAlert("Posted", "Thank You! Your Shayari has been successfully saved in My Shayari.");
+                  }
 
-            <TouchableOpacity style={styles.saveButton} onPress={saveToGallery}>
-              <Ionicons
-                name="download-outline"
-                size={18}
-                color="#fff"
-                style={{ marginRight: 6 }}
-              />
-              <Text style={styles.shareButtonText}>Save</Text>
+                  // ✅ Reset state and navigate
+                  setIsEditing(false);
+                  setShayariText("");
+                  navigation.dispatch(
+                    CommonActions.reset({
+                      index: 0,
+                      routes: [{ name: "HomeScreen" }],
+                    })
+                  );
+
+                } catch (error) {
+                  console.log("Shayari save error:", error);
+                  showCustomAlert("Error", "Failed to save Shayari.");
+                }
+              }}
+              style={styles.headerIcon}
+            >
+              <TickIcon width={40} height={40} />
             </TouchableOpacity>
           </View>
+
+          {/* Shayari Card Row */}
+          <View style={styles.cardRow}>
+            <View ref={cardRef} collapsable={false}>
+              <CustomAlert
+                visible={customAlertVisible}
+                title={alertTitle}
+                message={alertMessage}
+                onClose={() => setCustomAlertVisible(false)}
+              />
+
+              <ImageBackground
+                source={backgroundImage}
+                imageStyle={styles.imageBorder}
+                style={[
+                  styles.backgroundCard,
+                  backgroundColor && { backgroundColor },
+                ]}
+                resizeMode="cover"
+              >
+                <View style={styles.innerRow}>
+                  {/* Shayari Text - Now Editable */}
+                  <TouchableOpacity
+                    style={styles.textWrapper}
+                    onPress={handleCardTap}
+                    activeOpacity={0.8}
+                  >
+                    {isEditing ? (
+                      <TextInput
+                        style={[
+                          styles.shayariText,
+                          styles.textInput,
+                          {
+                            fontSize,
+                            opacity,
+                            fontFamily,
+                            fontWeight,
+                            fontStyle,
+                            color: fontColor,
+                            textAlign,
+                          },
+                        ]}
+                        value={shayariText}
+                        onChangeText={setShayariText}
+                        multiline={true}
+                        placeholder="Write your shayari here..."
+                        placeholderTextColor={`${fontColor}80`}
+                        onBlur={handleTextSubmit}
+                        autoFocus={true}
+                        textAlignVertical="center"
+                      />
+                    ) : (
+                      <Text
+                        style={[
+                          styles.shayariText,
+                          {
+                            fontSize,
+                            opacity: textOpacity,
+                            fontFamily,
+                            fontWeight,
+                            fontStyle,
+                            color: fontColor,
+                            textAlign,
+                          },
+                        ]}
+                      >
+                        {displayText}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </ImageBackground>
+            </View>
+          </View>
+
+          {/* Share Modal */}
+          {customShareModalVisible && (
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalBox}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setCustomShareModalVisible(false)}
+                >
+                  <Ionicons name="close" size={22} color="#333" />
+                </TouchableOpacity>
+
+                {/* <View style={styles.previewBox} /> */}
+                <NativeCard />
+
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity
+                    style={styles.shareButton}
+                    onPress={() => {
+                      Share.share({
+                        message: shayariText.replace(/\\n/g, "\n"),
+                      });
+                      setCustomShareModalVisible(false);
+                    }}
+                  >
+                    <WhiteText width={18} height={18} />
+                    <Text style={styles.shareButtonText}>Share Text</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.shareButton}
+                    onPress={shareAsImage}
+                  >
+                    <Ionicons
+                      name="image-outline"
+                      size={18}
+                      color="#fff"
+                      style={{ marginRight: 6 }}
+                    />
+                    <Text style={styles.shareButtonText}>Share Image</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity style={styles.saveButton} onPress={saveToGallery}>
+                  <Ionicons
+                    name="download-outline"
+                    size={18}
+                    color="#fff"
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.shareButtonText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {/* Action Buttons */}
+          <View style={{ marginBottom: 20 }}>
+            <ImageBackground
+              source={require("../assets/bgbottom.png")}
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+                alignItems: "center",
+                padding: 10,
+              }}
+            >
+              <TouchableOpacity onPress={handleCopy}>
+                {isCopied ? (
+                  <TickIcon width={22} height={20} fill="#000" />
+                ) : (
+                  <CopyIcon width={22} height={20} fill="#000" />
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleShare}>
+                <ShareIcon width={22} height={20} fill="#000" />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={toggleFavorite}>
+                {isFav ? (
+                  <LikedIcon width={22} height={20} fill="#000" />
+                ) : (
+                  <FavIcon width={22} height={20} fill="#000" />
+                )}
+              </TouchableOpacity>
+            </ImageBackground>
+          </View>
         </View>
-      )}
-
-      {/* Action Buttons */}
-      <View style={{ marginBottom: 20 }}>
-        <ImageBackground
-          source={require("../assets/bgbottom.png")}
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-around",
-            alignItems: "center",
-            padding: 10,
-          }}
-        >
-          <TouchableOpacity onPress={handleCopy}>
-            {isCopied ? (
-              <TickIcon width={22} height={20} fill="#000" />
-            ) : (
-              <CopyIcon width={22} height={20} fill="#000" />
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={handleShare}>
-            <ShareIcon width={22} height={20} fill="#000" />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={toggleFavorite}>
-            {isFav ? (
-              <LikedIcon width={22} height={20} fill="#000" />
-            ) : (
-              <FavIcon width={22} height={20} fill="#000" />
-            )}
-          </TouchableOpacity>
-        </ImageBackground>
-      </View>
-    </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("screen");
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
@@ -498,7 +509,7 @@ const styles = StyleSheet.create({
   },
   backgroundCard: {
     width: 420,
-    height: 740,
+    height: SCREEN_HEIGHT - verticalScale(150),
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
@@ -552,13 +563,14 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   modalBox: {
-    width: 300,
     backgroundColor: "#fff",
     borderRadius: 20,
     padding: 20,
     paddingTop: 30,
     alignItems: "center",
     position: "relative",
+    marginHorizontal: moderateScale(50),
+
   },
   closeButton: {
     position: "absolute",
@@ -589,17 +601,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 30,
     marginHorizontal: 4,
-    flex: 1,
     justifyContent: "center",
   },
   saveButton: {
     margin: 10,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#19173D",
     borderRadius: 30,
-    width: "100%",
+    width: scale(250),
     justifyContent: "center",
   },
   shareButtonText: {

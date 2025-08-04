@@ -19,23 +19,28 @@ import { captureRef } from "react-native-view-shot";
 import * as MediaLibrary from "expo-media-library";
 import * as Clipboard from "expo-clipboard";
 import * as Sharing from "expo-sharing";
-import EditIcon from "../assets/whiteedit.svg";
 import CustomAlert from "../CustomAlert";
-import CopyIcon from "../assets/copyWhite.svg";
-import FavIcon from "../assets/heartWhite.svg";
-import ShareIcon from "../assets/shareWhite.svg";
 import TickIcon from "../assets/tick.svg";
 import LikedIcon from "../assets/heart.svg";
-import TextIcon from "../assets/text.svg";
 import ShayariCardActions from "../Action";
 import CustomShareModal from "../CustomShareModal";
 import { fontScale, scale, scaleFont } from "../Responsive";
+import WhiteCopyIcon from "../assets/copy.svg";
+import WhiteFavIcon from "../assets/favourite ( stroke ).svg";
+import WhiteEditIcon from "../assets/edit.svg";
+import WhiteShareIcon from "../assets/share.svg";
+import { useRewardAd } from "../RewardContext";
+import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("screen");
 const CARD_WIDTH = SCREEN_WIDTH;
-const CARD_HEIGHT = SCREEN_HEIGHT - 165;
+const CARD_HEIGHT = SCREEN_HEIGHT - scale(240);
 
 export default function ShayariFullViewScreen({ route }) {
+  console.log(route.params);
+  const insets = useSafeAreaInsets();
+
   const [favorites, setFavorites] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
   const [customAlertVisible, setCustomAlertVisible] = useState(false);
@@ -43,71 +48,19 @@ export default function ShayariFullViewScreen({ route }) {
   const [alertMessage, setAlertMessage] = useState("");
   const [customShareModalVisible, setCustomShareModalVisible] = useState(false);
   const [selectedShayari, setSelectedShayari] = useState(null);
-  const [shayaris, setShaayris] = useState("");
+  const [shayaris, setShaayris] = useState(null);
   const cardRef = useRef(null);
   // const shayari = route.params.shayari.text.replace(/\\n/g, "\n");
   const navigation = useNavigation();
+  const [isFav, setIsFav] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+
   const handleShare = useCallback((item) => {
     setSelectedShayari(item);
     setCustomShareModalVisible(true);
   }, []);
 
-  const showCustomAlert = (title, message) => {
-    setAlertTitle(title);
-    setAlertMessage(message);
-    setCustomAlertVisible(true);
-  };
-  const handleEdit = useCallback(
-    (item) => {
-      navigation.navigate("HomeStack", {
-        screen: "ShayariEditScreen",
-        params: { shayari: item },
-      });
-    },
-    [navigation]
-  );
 
-  const shareAsImage = async () => {
-    try {
-      if (!cardRef.current) return;
-      const uri = await captureRef(cardRef, { format: "png", quality: 1 });
-      const isAvailable = await Sharing.isAvailableAsync();
-      if (isAvailable) {
-        await Sharing.shareAsync(uri, {
-          mimeType: "image/png",
-          dialogTitle: "Share Shayari Image",
-        });
-      } else {
-        showCustomAlert("Error", "Sharing not available on this device.");
-      }
-      setCustomShareModalVisible(false);
-    } catch (error) {
-      console.log("Error sharing as image:", error);
-      showCustomAlert("Error", "Failed to share as image.");
-    }
-  };
-
-  const saveToGallery = async () => {
-    try {
-      const permission = await MediaLibrary.requestPermissionsAsync();
-      if (!permission.granted) {
-        showCustomAlert(
-          "Permission Required",
-          "Please allow access to save images."
-        );
-        return;
-      }
-      const uri = await captureRef(cardRef, { format: "png", quality: 1 });
-      const asset = await MediaLibrary.createAssetAsync(uri);
-      await MediaLibrary.createAlbumAsync("Shayari", asset, false);
-      showCustomAlert("Success", "Shayari saved to your gallery!");
-    } catch (error) {
-      console.error("Save Error:", error);
-      showCustomAlert("Error", "Failed to save image.");
-    } finally {
-      setCustomShareModalVisible(false);
-    }
-  };
 
   const loadFavorites = async () => {
     try {
@@ -123,34 +76,71 @@ export default function ShayariFullViewScreen({ route }) {
       loadFavorites();
     }, [])
   );
+  // const { showRewardAd } = useRewardAd();
+  const handleCopy = async () => {
+    if (!shayaris) return;
 
-  const isFav = favorites.some((fav) => fav._id === route.params.shayari._id);
-  const isCopied = copiedId === route.params.shayari._id;
+    await Clipboard.setStringAsync(shayaris.text);
 
-  const toggleFavorite = (shayari) => {
-    const updated = isFav
-      ? favorites.filter((item) => item._id !== shayari._id)
-      : [...favorites, shayari];
-    AsyncStorage.setItem("favorites", JSON.stringify(updated));
-    setFavorites(updated);
-    Toast.show(isFav ? "Removed from Favorites" : "Added to Favorites", {
-      duration: Toast.durations.SHORT,
-      position: Toast.positions.BOTTOM,
-    });
+    // // Track copy count
+    // const current = Number(await AsyncStorage.getItem("Copycount")) || 0;
+    // const updatedCount = current + 1;
+    // console.log("updateCount", updatedCount);
+
+    // await AsyncStorage.setItem("Copycount", String(updatedCount));
+
+    // // ✅ Show ad after every 3 copies
+    // if (updatedCount % 3 === 0) {
+    //   showRewardAd(); // <-- You must define this function (see below)
+    // }
+
+    setCopiedId(shayaris._id);
+    setIsCopied(true);
+
+    setTimeout(() => {
+      setCopiedId(null);
+      setIsCopied(false);
+    }, 2000);
   };
 
-  const handleCopy = (item) => {
-    Clipboard.setStringAsync(item.text);
-    setCopiedId(item._id);
-    Toast.show("Copied to clipboard!", {
-      duration: Toast.durations.SHORT,
-      position: Toast.positions.BOTTOM,
-    });
-    setTimeout(() => setCopiedId(null), 2000);
+
+  const toggleFavorite = async () => {
+    if (!shayaris) return;
+
+    const isAlreadyFav = favorites.some((fav) => fav._id === shayaris._id);
+    const updatedFavorites = isAlreadyFav
+      ? favorites.filter((fav) => fav._id !== shayaris._id)
+      : [...favorites, shayaris];
+
+    try {
+      await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+      setFavorites(updatedFavorites);
+      setIsFav(!isAlreadyFav); // update UI state
+      Toast.show(
+        isAlreadyFav ? "Removed from Favorites" : "Added to Favorites",
+        {
+          duration: Toast.durations.SHORT,
+          position: Toast.positions.BOTTOM,
+        }
+      );
+    } catch (e) {
+      console.error("Failed to update favorites", e);
+    }
   };
+
+  useEffect(() => {
+    if (shayaris) {
+      setIsCopied(copiedId === shayaris._id);
+      const isAlreadyFav = favorites.some((fav) => fav._id === shayaris._id);
+      setIsFav(isAlreadyFav);
+    }
+  }, [shayaris, favorites, copiedId]);
+
   const { shayariList, initialIndex } = route.params;
 
   const flatListRef = useRef(null);
+
+  console.log("isFav", isFav);
 
   useEffect(() => {
     if (flatListRef.current && initialIndex >= 0) {
@@ -168,9 +158,18 @@ export default function ShayariFullViewScreen({ route }) {
 
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
-      setShaayris(viewableItems[0].item);
+      const currentShayari = viewableItems[0].item;
+      setShaayris(currentShayari);
+
+      // Update copied state
+      setIsCopied(copiedId === currentShayari._id);
+
+      // Update favorite state
+      const isAlreadyFav = favorites.some((fav) => fav._id === currentShayari._id);
+      setIsFav(isAlreadyFav);
     }
   });
+
 
   return (
     <View style={styles.container}>
@@ -210,6 +209,8 @@ export default function ShayariFullViewScreen({ route }) {
                 viewabilityConfig={viewabilityConfig}
                 renderItem={({ item }) => {
                   const shayari = item.text.replace(/\\n/g, "\n");
+                  console.log(shayari);
+
                   return (
                     <View
                       style={{
@@ -229,13 +230,49 @@ export default function ShayariFullViewScreen({ route }) {
         </View>
       </View>
 
-      <ShayariCardActions
-        title={route.params.title}
-        onShare={() => handleShare(shayaris)}
-        shayari={shayaris}
-        isExpand={false}
-        isBg={true}
-      />
+      <View style={styles.actionsDark}>
+        <TouchableOpacity onPress={handleCopy}>
+          {isCopied ? (
+            <TickIcon width={40} height={40} />
+          ) : (
+            <WhiteCopyIcon width={40} height={40} />
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={toggleFavorite}>
+          {isFav ? (
+            <LikedIcon width={25} height={40} />
+          ) : (
+            <WhiteFavIcon width={40} height={40} />
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            if (!shayaris) return;
+            if (route.params.title === "My Post Shayari") {
+              navigation.navigate("HomeStack", {
+                screen: "Writeshayari",
+                params: { shayari: shayaris }
+              })
+            } else {
+
+              navigation.navigate("HomeStack", {
+                screen: "ShayariEditScreen",
+                params: { shayari: shayaris },
+              });
+            }
+          }}
+        >
+          <WhiteEditIcon width={40} height={40} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => handleShare(shayaris)}>
+          <WhiteShareIcon width={40} height={40} />
+        </TouchableOpacity>
+      </View>
+
+
 
       {/* Custom Share Modal */}
       <CustomShareModal
@@ -244,6 +281,18 @@ export default function ShayariFullViewScreen({ route }) {
         onClose={() => setCustomShareModalVisible(false)}
         cardRef={cardRef}
       />
+      <View style={{ position: 'absolute', bottom: insets.bottom, left: 0, right: 0 }}>
+        <BannerAd
+          unitId={TestIds.BANNER}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: true,
+            networkExtras: {
+              collapsible: "bottom",
+            },
+          }}
+        />
+      </View>
     </View>
   );
 }
@@ -350,4 +399,15 @@ const styles = StyleSheet.create({
     fontSize: fontScale * scaleFont(14),
     fontWeight: "600",
   },
+  actionsDark: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 10,
+    paddingHorizontal: 9,
+    backgroundColor: "#191734",
+    borderTopWidth: 0,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  }
+
 });

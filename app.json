@@ -16,12 +16,14 @@
       "icon": "./assets/applogo.png"
     },
     "android": {
+      "jsEngine": "hermes",
       "adaptiveIcon": {
         "foregroundImage": "./assets/applogo.png",
         "backgroundColor": "#08041C"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.mahakasde.HindiShayari"
+      "package": "com.HindiShayari",
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
     },
     "web": {
       "favicon": "./assets/applogo.png"

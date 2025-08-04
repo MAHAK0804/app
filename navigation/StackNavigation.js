@@ -1,6 +1,12 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../ThemeContext";
 import CustomDrawerContent from "../CustomDrawerContent";
@@ -14,36 +20,72 @@ import LoginScreen from "../screen/LoginScreen";
 import VerifyOTPScreen from "../screen/VerifyOtpScreen";
 import ShayariListScreen from "../screen/ShayariByCategory";
 import WheelGame from "../screen/WheelGame";
-import PrivacyPolicyScreen from "../screen/PrivacyPolicies";
 import AllCategories from "../screen/AllCategories";
-import { fontScale, scaleFont } from "../Responsive";
+import { fontScale, scale, scaleFont, verticalScale } from "../Responsive";
+import CreateShayari from "../assets/add ( plus ).svg";
+import { useContext } from "react";
+import { AuthContext } from "../AuthContext";
+import MenuBar from "../assets/MENU BAR.svg";
+import BackArrow from "../assets/left arrow.svg";
+import { useRewardAd } from "../RewardContext";
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 const CustomEditHeader = ({ theme, title }) => {
   const navigation = useNavigation();
+  const { isLogin } = useContext(AuthContext);
+  const { showRewardAd } = useRewardAd();
 
   return (
-    <View style={styles.customHeader}>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.iconLeft}
-      >
-        <Ionicons name="arrow-back" size={24} color="#fff" />
-      </TouchableOpacity>
-
-      <View style={styles.titleContainer}>
-        <Text
-          numberOfLines={1}
-          style={[styles.headerTitleText, { color: theme.primary }]}
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.customHeader}>
+        <TouchableOpacity
+          onPress={() => {
+            if (title === "Favourite") {
+              showRewardAd();
+              navigation.goBack();
+            } else {
+              navigation.goBack();
+            }
+          }}
+          style={styles.iconLeft}
         >
-          {title}
-        </Text>
+          {/* <Ionicons name="arrow-back" size={24} color="#fff" /> */}
+          <BackArrow width={40} height={40} />
+        </TouchableOpacity>
+        <View style={styles.titleContainer}>
+          <Text
+            numberOfLines={1}
+            style={[styles.headerTitleText, { color: theme.primary }]}
+          >
+            {title}
+          </Text>
+        </View>
+        {title === "My Shayari" && (
+          <TouchableOpacity
+            onPress={() => {
+              showRewardAd();
+
+              return isLogin
+                ? navigation.navigate("HomeStack", {
+                    screen: "Writeshayari",
+                  })
+                : navigation.navigate("HomeStack", {
+                    screen: "LoginScreen",
+                  });
+            }}
+            style={{ marginRight: scale(7) }}
+          >
+            <CreateShayari width={32} height={32} />
+          </TouchableOpacity>
+        )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 function HomeStack({ navigation }) {
   const { theme } = useTheme();
+  const { isLogin } = useContext(AuthContext);
+  const { showRewardAd } = useRewardAd();
 
   return (
     <Stack.Navigator>
@@ -57,7 +99,8 @@ function HomeStack({ navigation }) {
                 onPress={() => navigation.openDrawer()}
                 style={styles.iconLeft}
               >
-                <Ionicons name="menu" size={24} color={theme.primary} />
+                {/* <Ionicons name="menu" size={24} color={theme.primary} /> */}
+                <MenuBar width={40} height={40} />
               </TouchableOpacity>
 
               <View style={styles.titleContainer}>
@@ -69,6 +112,22 @@ function HomeStack({ navigation }) {
                 </Text>
               </View>
               <TouchableOpacity
+                onPress={() => {
+                  showRewardAd();
+
+                  return isLogin
+                    ? navigation.navigate("HomeStack", {
+                        screen: "Writeshayari",
+                      })
+                    : navigation.navigate("HomeStack", {
+                        screen: "LoginScreen",
+                      });
+                }}
+                style={styles.iconLeft}
+              >
+                <CreateShayari width={32} height={32} />
+              </TouchableOpacity>
+              <TouchableOpacity
                 onPress={() =>
                   navigation.navigate("HomeStack", {
                     screen: "Shayari",
@@ -78,7 +137,7 @@ function HomeStack({ navigation }) {
                     },
                   })
                 }
-                style={styles.iconLeft}
+                style={{ marginRight: scale(7) }}
               >
                 <Ionicons name="heart" size={24} color="#fff" />
               </TouchableOpacity>
@@ -116,7 +175,7 @@ function HomeStack({ navigation }) {
         name="ShayariEditScreen"
         component={ShayariEditScreen}
         options={{
-          header: () => <CustomEditHeader theme={theme} title="Edit" />,
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -144,11 +203,6 @@ function HomeStack({ navigation }) {
       <Stack.Screen
         name="VerifyOTPScreen"
         component={VerifyOTPScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="PrivacyPolicy"
-        component={PrivacyPolicyScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
@@ -182,29 +236,30 @@ export default function DrawerNavigation() {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 0,
+  },
   customHeader: {
+    backgroundColor: "#191734", // Match the header background
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#191734",
-    paddingHorizontal: 10,
-    paddingVertical: 43,
-    paddingBottom: 10,
+    justifyContent: "center", // Space between items
+    paddingHorizontal: scale(10),
+    paddingTop: verticalScale(30), // Adjusted vertical padding
+    paddingBottom: verticalScale(15),
     elevation: 4,
   },
   iconLeft: {
-    // padding: 1,
-    marginVertical: 2,
+    // marginVertical: 2,
   },
-
   titleContainer: {
     flex: 1,
-    // alignItems: "start",
-    justifyContent: "flex-start",
+    justifyContent: "center", // Center title vertically
     marginHorizontal: 10,
   },
   headerTitleText: {
     fontSize: fontScale * scaleFont(18),
-    textAlign: "start",
+    textAlign: "start", // Center text
     fontFamily: "Manrope_400Regular",
   },
 });

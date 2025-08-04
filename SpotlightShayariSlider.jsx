@@ -184,13 +184,13 @@ const dynamicCardHeight = dynamicFontSize * 12;
 
 const styles = StyleSheet.create({
   card: {
-    width: scale(350),
+    width: scale(335),
     // height: dynamicCardHeight,
     height: dynamicCardHeight,
     borderRadius: 18,
     // overflow: "hidden",
     // marginBottom: 10,
-    marginHorizontal: 15,
+    marginHorizontal: 14,
   },
 
   bgImage: {

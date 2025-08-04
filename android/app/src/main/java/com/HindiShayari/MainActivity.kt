@@ -1,4 +1,4 @@
-package com.mahakasde.HindiShayari
+package com.HindiShayari
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

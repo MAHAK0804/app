@@ -1,22 +1,23 @@
 import React, { useContext, useState, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import CopyIcon from "./assets/copy.svg";
+import CopyIcon from "./assets/copyBlack.svg";
 import TickIcon from "./assets/tick.svg";
-import FavIcon from "./assets/favourite.svg";
+import FavIcon from "./assets/favouriteBlack.svg";
 import LikedIcon from "./assets/heart.svg";
-import EditIcon from "./assets/edit.svg";
-import ShareIcon from "./assets/share.svg";
-import ExpandIcon from "./assets/expand.svg";
-import WhiteCopyIcon from "./assets/copyWhite.svg";
-import WhiteFavIcon from "./assets/heartWhite.svg";
-import WhiteEditIcon from "./assets/whiteedit.svg";
-import WhiteShareIcon from "./assets/shareWhite.svg";
+import EditIcon from "./assets/editBlack.svg";
+import ShareIcon from "./assets/shareBlack.svg";
+import ExpandIcon from "./assets/expandBlack.svg";
+import WhiteCopyIcon from "./assets/copy.svg";
+import WhiteFavIcon from "./assets/favourite ( stroke ).svg";
+import WhiteEditIcon from "./assets/edit.svg";
+import WhiteShareIcon from "./assets/share.svg";
 import WhiteExpandIcon from "./assets/expand (1) 1.svg";
 import BlackTick from "./assets/tick black.svg";
 import Toast from "react-native-root-toast";
 import * as Clipboard from "expo-clipboard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { useRewardAd } from "./RewardContext";
 
 export default function ShayariCardActions({
   title,
@@ -29,22 +30,43 @@ export default function ShayariCardActions({
   isEdit = true,
   isBg = false,
   isCat = false,
+  isIcon = true
 }) {
   const [copied, setCopied] = useState(false);
   const [isFav, setIsFav] = useState(false);
+  const [copyCount, setCopyCount] = useState(0);
+  console.log("copy count", copyCount);
+
+
+
 
   const navigation = useNavigation();
 
   useEffect(() => {
     checkIsFav();
   }, []);
+  // const { showRewardAd } = useRewardAd();
 
   const handleCopy = async () => {
     await Clipboard.setStringAsync(shayari.text);
+
+    // const current = Number(await AsyncStorage.getItem("Copycount")) || 0;
+    // const updatedCount = current + 1;
+    // console.log("updateCount", updatedCount);
+
+    // await AsyncStorage.setItem("Copycount", String(updatedCount));
+    // setCopyCount(updatedCount);
     setCopied(true);
-    // Toast.show("Copied to clipboard!");
-    // setTimeout(() => setCopied(false), 2000);
+
+    // ✅ Show rewarded ad after every 3 copies
+    // if (updatedCount % 3 === 0) {
+    //   showRewardAd();
+    // }
+
+    setTimeout(() => setCopied(null), 2000);
   };
+
+
 
   const checkIsFav = async () => {
     const stored = await AsyncStorage.getItem("favorites");
@@ -114,54 +136,59 @@ export default function ShayariCardActions({
 
   return (
     <View style={getActionStyle()}>
-      <TouchableOpacity onPress={handleCopy}>
-        {copied ? (
-          isCat ? (
-            <BlackTick width={22} height={20} />
+      {isIcon &&
+        <TouchableOpacity onPress={handleCopy}>
+          {copied ? (
+            isCat ? (
+              <BlackTick width={40} height={40} />
+            ) : (
+              <TickIcon width={40} height={40} />
+            )
+          ) : isSpotlightScreen || isBg ? (
+            <WhiteCopyIcon width={40} height={40} />
           ) : (
-            <TickIcon width={22} height={20} />
-          )
-        ) : isSpotlightScreen || isBg ? (
-          <WhiteCopyIcon width={22} height={20} />
-        ) : (
-          <CopyIcon width={22} height={20} />
-        )}
-      </TouchableOpacity>
+            <CopyIcon width={40} height={40} />
+          )}
+        </TouchableOpacity>
+      }
 
-      <TouchableOpacity onPress={toggleFavorite}>
-        {isFav ? (
-          <LikedIcon width={22} height={20} />
-        ) : isSpotlightScreen || isBg ? (
-          <WhiteFavIcon width={22} height={20} />
-        ) : (
-          <FavIcon width={22} height={20} />
-        )}
-      </TouchableOpacity>
+      {isIcon &&
+
+        <TouchableOpacity onPress={toggleFavorite}>
+          {isFav ? (
+            <LikedIcon width={25} height={40} />
+          ) : isSpotlightScreen || isBg ? (
+            <WhiteFavIcon width={40} height={40} />
+          ) : (
+            <FavIcon width={40} height={40} />
+          )}
+        </TouchableOpacity>
+      }
 
       {isEdit && (
         <TouchableOpacity onPress={handleEdit}>
           {isSpotlightScreen || isBg ? (
-            <WhiteEditIcon width={22} height={20} />
+            <WhiteEditIcon width={40} height={40} />
           ) : (
-            <EditIcon width={22} height={20} />
+            <EditIcon width={40} height={40} />
           )}
         </TouchableOpacity>
       )}
 
       <TouchableOpacity onPress={onShare}>
         {isSpotlightScreen || isBg ? (
-          <WhiteShareIcon width={22} height={20} />
+          <WhiteShareIcon width={40} height={40} />
         ) : (
-          <ShareIcon width={22} height={20} />
+          <ShareIcon width={40} height={40} />
         )}
       </TouchableOpacity>
 
       {isExpand && (
         <TouchableOpacity onPress={handleExpand}>
           {isSpotlightScreen || isBg ? (
-            <WhiteExpandIcon width={22} height={20} />
+            <WhiteExpandIcon width={40} height={40} />
           ) : (
-            <ExpandIcon width={22} height={20} />
+            <ExpandIcon width={40} height={40} />
           )}
         </TouchableOpacity>
       )}

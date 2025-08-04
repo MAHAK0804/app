@@ -1,4 +1,4 @@
-package com.mahakasde.HindiShayari
+package com.HindiShayari
 
 import android.app.Application
 import android.content.res.Configuration

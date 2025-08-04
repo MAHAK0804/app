@@ -8,18 +8,26 @@ import {
   PixelRatio,
 } from "react-native";
 import { scaleFont } from "./Responsive";
+import { useNavigation } from "@react-navigation/native";
 
 export default function CustomAlert({ visible, title, message, onClose }) {
   console.log(visible);
 
   if (!visible) return null;
-
+  const navigation = useNavigation();
   return (
     <View style={styles.overlay}>
       <View style={styles.box}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.message}>{message}</Text>
-        <TouchableOpacity style={styles.button} onPress={onClose}>
+        <TouchableOpacity style={styles.button} onPress={() => {
+          if (message === "Thank You! Your Shayari has been successfully saved in My Shayari.")
+            navigation.navigate("Shayari", {
+              type: "mine",
+              title: "My Shayari",
+            })
+          onClose()
+        }}>
           <Text style={styles.buttonText}>OK</Text>
         </TouchableOpacity>
       </View>

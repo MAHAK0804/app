@@ -1,207 +1,159 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Switch,
   Linking,
-  Alert,
   Image,
   ImageBackground,
-  Button,
-  NativeModules,
   Dimensions,
+  Share,
 } from "react-native";
 import {
   DrawerContentScrollView,
-  DrawerItemList,
 } from "@react-navigation/drawer";
-import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
-import * as Updates from "expo-updates";
+import {
+  Ionicons,
+  MaterialIcons,
+  FontAwesome5,
+} from "@expo/vector-icons";
 import { useTheme } from "./ThemeContext";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "./AuthContext";
 import { fontScale, scale, scaleFont } from "./Responsive";
 import MyShayari from "./assets/myshayariicon.svg";
 import AtRateIcon from "./assets/atrate.svg";
 import { LinearGradient } from "expo-linear-gradient";
+
 const { width } = Dimensions.get("screen");
+
 export default function CustomDrawerContent(props) {
   const { theme, isDark, toggleTheme } = useTheme();
-  // const [user, setUser] = useState(null); // Will hold name and email
   const { user, logout, isLogin } = useContext(AuthContext);
   const navigation = useNavigation();
 
-  // Function to open the app's store page for rating
   const rateApp = () => {
-    // Replace 'com.yourapp.package' with your actual Android package name
-    Linking.openURL("market://details?id=com.yourapp.package").catch((err) =>
-      console.error("An error occurred opening store link", err)
-    );
+    Linking.openURL("market://details?id=com.HindiShayar").catch(console.error);
   };
 
-  // Function to open the developer's page with more apps
-  const moreApps = () => {
+  const sendFeedbackMail = () => {
     Linking.openURL(
-      "https://play.google.com/store/apps/developer?id=YourPublisherName"
-    ).catch((err) =>
-      console.error("An error occurred opening developer link", err)
+      "mailto:jhingurlab@gmail.com?subject=Feedback&body=Hi, I would like to share some feedback..."
     );
   };
 
-  // Function to handle logout, clearing AsyncStorage items
   const handleLogout = () => {
     logout();
     props.navigation.closeDrawer();
     navigation.navigate("Home");
   };
 
+  const shareApp = () => {
+    Share.share({
+      message: `📝✨ Feelings deserve the perfect words...
+
+📲 Download *Hindi Shayari Wale* — your daily dose of heart-touching Shayaris!
+
+💖 Love | 💔 Sad | 😍 Romantic | 😄 Funny | 🧠 Motivational | 💭 Yaad | 🌅 Morning & more!
+
+🎨 Customize backgrounds, fonts & colors  
+🛄 Share Shayari as image or text with one tap!
+
+👇 Express yourself in style. Try it now!
+🔗 https://play.google.com/store/apps/details?id=com.HindiShayari`,
+    });
+  };
+
   return (
-    // DrawerContentScrollView provides the basic scrollable drawer functionality
     <DrawerContentScrollView
       {...props}
       style={[styles.drawerContainer, { backgroundColor: theme.background }]}
     >
-      {/* Header Section with ImageBackground */}
       <ImageBackground
         source={require("./assets/Rectangle 55.png")}
         style={styles.headerBackground}
         imageStyle={styles.headerImageStyle}
       >
-        {/* Overlay to ensure text readability on the background image */}
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           {user ? (
-            <>
-              <View style={[styles.headerOverlay]}>
-                {/* Profile Image - Placeholder */}
-                {/* <Image
-                  source={require("./assets/Ellipse 32.png")} // Placeholder for Aayushi's image
-                  style={styles.profileImage}
-                /> */}
-                <Text style={styles.appName}>{user.name}</Text>
-                <Text style={styles.email}>
-                  {user.email ? user.email : user.phone}
-                </Text>
-              </View>
-              {/* <Text
-                style={{
-                  color: "#fff",
-                  fontSize: 25,
-                  marginRight: 10,
-                  paddingVertical: 15,
-                }}
-              >
-                Hindi Shayari Lok
-              </Text> */}
-            </>
-          ) : (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                paddingVertical: 20,
-              }}
-            >
-              <Text
-                style={{ color: "#fff", fontSize: fontScale * scaleFont(25) }}
-              >
-                Hindi Shayari Lok
+            <View style={styles.headerOverlay}>
+              <Text style={styles.appName}>{user.name}</Text>
+              <Text style={styles.email}>
+                {user.email || user.phone}
               </Text>
+            </View>
+          ) : (
+            <View style={styles.headerCenterText}>
+              <Text style={styles.guestText}>Hindi Shayari Lok</Text>
             </View>
           )}
         </View>
       </ImageBackground>
 
-      {/* Menu Items Section */}
       <View style={styles.menuItemsContainer}>
-        {/* Home Item */}
-        <TouchableOpacity
-          style={[styles.menuItem]}
+        <DrawerMenuItem
+          icon={<Ionicons name="heart" size={22} color="red" />}
+          label="Favourites"
           onPress={() =>
             navigation.navigate("Shayari", {
               type: "favorites",
               title: "Favourite",
             })
           }
-        >
-          <Ionicons name="heart" size={22} color="red" />
-          <Text style={[styles.menuText, { color: theme.text }]}>
-            Favourites
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.menuItem]}
+        />
+        <DrawerMenuItem
+          icon={<MyShayari width={scale(28)} height={scale(28)} />}
+          label="My Shayaris"
           onPress={() =>
             navigation.navigate("Shayari", {
               type: "mine",
               title: "My Shayari",
             })
           }
-        >
-          <MyShayari width={scale(28)} height={scale(28)} />
-          <Text style={[styles.menuText, { color: theme.text }]}>
-            My Shayaris
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.menuItem]}
+        />
+        <DrawerMenuItem
+          icon={
+            <Image
+              source={require("./assets/pencil 2.png")}
+              style={styles.pencilIcon}
+            />
+          }
+          label="Write Own Shayari"
           onPress={() =>
             isLogin
               ? navigation.navigate("Writeshayari")
               : navigation.navigate("LoginScreen")
           }
-        >
-          <Image
-            source={require("./assets/pencil 2.png")}
-            style={styles.pencilIcon}
-          />
-          <Text style={[styles.menuText, { color: theme.text }]}>
-            Write Own Shayari
-          </Text>
-        </TouchableOpacity>
-        {/* FeedbackItem */}
-        <TouchableOpacity style={styles.menuItem} onPress={moreApps}>
-          <AtRateIcon />
-          <Text style={[styles.menuText, { color: theme.text }]}>Feedback</Text>
-        </TouchableOpacity>
-        {/*share Item */}
-        <TouchableOpacity style={styles.menuItem} onPress={moreApps}>
-          <Ionicons name="share-social-outline" size={22} color={theme.text} />
-          <Text style={[styles.menuText, { color: theme.text }]}>Share</Text>
-        </TouchableOpacity>
-        {/* Rate Us Item */}
-        <TouchableOpacity style={styles.menuItem} onPress={rateApp}>
-          <Ionicons name="star" size={22} color="gold" />
-          <Text style={[styles.menuText, { color: theme.text }]}>Rate </Text>
-        </TouchableOpacity>
-        {/* privacy Item */}
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => navigation.navigate("PrivacyPolicy")}
-        >
-          <MaterialIcons name="flag" size={22} color={theme.text} />
-          <Text style={[styles.menuText, { color: theme.text }]}>
-            Privacy Policy
-          </Text>
-        </TouchableOpacity>
-        {/* More Apps Item */}
-        <TouchableOpacity style={styles.menuItem} onPress={moreApps}>
-          <MaterialIcons name="grid-view" size={22} color={theme.text} />
-          <Text style={[styles.menuText, { color: theme.text }]}>
-            Other Apps
-          </Text>
-        </TouchableOpacity>
-
-        {/* Logout Item */}
+        />
+        <DrawerMenuItem
+          icon={<AtRateIcon />}
+          label="Feedback"
+          onPress={sendFeedbackMail}
+        />
+        <DrawerMenuItem
+          icon={<Ionicons name="share-social-outline" size={22} color={theme.text} />}
+          label="Share"
+          onPress={shareApp}
+        />
+        <DrawerMenuItem
+          icon={<Ionicons name="star" size={22} color="gold" />}
+          label="Rate Us"
+          onPress={rateApp}
+        />
+        <DrawerMenuItem
+          icon={<MaterialIcons name="flag" size={22} color={theme.text} />}
+          label="Privacy Policy"
+          onPress={() =>
+            Linking.openURL("https://jhingurlab.blogspot.com/2025/08/privacy-policy.html")
+          }
+        />
         {user && (
-          <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-            <FontAwesome5 name="sign-out-alt" size={22} color={theme.text} />{" "}
-            <Text style={[styles.menuText, { color: theme.text }]}>Logout</Text>
-          </TouchableOpacity>
+          <DrawerMenuItem
+            icon={<FontAwesome5 name="sign-out-alt" size={22} color={theme.text} />}
+            label="Logout"
+            onPress={handleLogout}
+          />
         )}
         <View style={styles.container}>
           <LinearGradient
@@ -223,16 +175,24 @@ export default function CustomDrawerContent(props) {
   );
 }
 
-// --- StyleSheet for React Native Components ---
+const DrawerMenuItem = ({ icon, label, onPress }) => {
+  const { theme } = useTheme();
+  return (
+    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
+      {icon}
+      <Text style={[styles.menuText, { color: theme.text }]}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
+
 const styles = StyleSheet.create({
   drawerContainer: {
-    flex: 1, // Ensures the drawer content fills the available space
+    flex: 1,
   },
   container: {
-    flex: 1,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    flexDirection: "row",
     marginVertical: 20,
   },
   line: {
@@ -246,28 +206,28 @@ const styles = StyleSheet.create({
   },
   headerBackground: {
     width: "100%",
-    height: 180, // Fixed height for the header background
+    height: 180,
     justifyContent: "center",
     alignItems: "center",
   },
   headerImageStyle: {
-    resizeMode: "cover", // Ensures the image covers the area
+    resizeMode: "cover",
   },
   headerOverlay: {
-    flex: 1, // Takes full space of ImageBackground
+    flex: 1,
     width: "100%",
-    // justifyContent: "center",
-    // alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 15,
   },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40, // Half of width/height for a perfect circle
-    borderWidth: 2,
-    borderColor: "#fff",
-    marginBottom: 3,
+  headerCenterText: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  guestText: {
+    color: "#fff",
+    fontSize: fontScale * scaleFont(25),
   },
   pencilIcon: {
     width: scale(20),
@@ -277,27 +237,27 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: fontScale * scaleFont(22),
     fontWeight: "bold",
-    color: "#fff", // White text for header
+    color: "#fff",
     marginTop: 8,
   },
   email: {
-    color: "#fff", // White text for header
+    color: "#fff",
     fontSize: fontScale * scaleFont(14),
     marginTop: 4,
   },
   menuItemsContainer: {
-    paddingTop: 10, // Add some padding above the menu items
+    paddingTop: 10,
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 14,
     paddingHorizontal: 20,
-    gap: 16, // Spacing between icon and text
+    gap: 16,
   },
   menuText: {
     fontSize: fontScale * scaleFont(16),
-    flex: 1, // Allows text to take remaining space
+    flex: 1,
     fontFamily: "Manrope_400Regular",
   },
 });

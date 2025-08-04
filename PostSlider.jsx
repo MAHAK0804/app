@@ -23,38 +23,37 @@ import Toast from "react-native-root-toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
-import { useNavigation } from "@react-navigation/native";
-import EditIcon from "./assets/whiteedit.svg";
-import CopyIcon from "./assets/copyWhite.svg";
-import FavIcon from "./assets/heartWhite.svg";
-import ShareIcon from "./assets/shareWhite.svg";
-import TickIcon from "./assets/tick.svg";
-import LikedIcon from "./assets/heart.svg";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+
 import { fontScale, scaleFont } from "./Responsive";
 
 const { width } = Dimensions.get("window");
 
 const PostSlider = () => {
+  const navigation = useNavigation();
+
   const [shayariList, setShayariList] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
   const [likedIds, setLikedIds] = useState([]);
   const scrollX = useRef(new Animated.Value(0)).current;
   const { userId } = useContext(AuthContext);
 
-  useEffect(() => {
-    const fetchShayaris = async () => {
-      try {
-        const res = await axios.get(
-          "https://hindishayari.onrender.com/api/users/shayaris/all"
-        );
-        setShayariList(res.data.filter((el) => el.userId._id == userId));
-      } catch (error) {
-        console.log("Error fetching shayaris ->", error);
-      }
-    };
-    fetchShayaris();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchShayaris = async () => {
+        try {
+          const res = await axios.get(
+            "https://hindishayari.onrender.com/api/users/shayaris/all"
+          );
+          setShayariList(res.data.filter((el) => el.userId._id === userId));
+        } catch (error) {
+          console.log("Error fetching shayaris ->", error);
+        }
+      };
 
+      if (userId) fetchShayaris();
+    }, [userId])
+  );
   useEffect(() => {
     (async () => {
       try {
@@ -120,6 +119,7 @@ const PostSlider = () => {
         styles.postCard,
         { width: widthOverride || width / 2 - 25, marginHorizontal: 5 },
       ];
+      console.log("shayri", shayariList);
 
       return (
         <TouchableOpacity onPress={() => {
@@ -176,7 +176,6 @@ const PostSlider = () => {
 
   const postData = shayariList;
   const length = postData.length;
-  const navigation = useNavigation();
   return (
     <View style={{ marginTop: 20, marginBottom: 25 }}>
       <View style={styles.postsHeader}>

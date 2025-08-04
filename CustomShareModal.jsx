@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Share } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import TextIcon from "./assets/text.svg";
 import * as Sharing from "expo-sharing";
 import { captureRef } from "react-native-view-shot";
@@ -8,7 +7,10 @@ import * as MediaLibrary from "expo-media-library";
 import { fontScale, moderateScale, scale, scaleFont } from "./Responsive";
 import Gallery from "./assets/gallery.svg";
 import DownloadGallery from "./assets/Download.svg";
-import CrossXMark from "./assets/cross-circle 1.svg";
+import CrossXMark from "./assets/cross.svg";
+import NativeCard from "./NativeCardAds";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRewardAd } from "./RewardContext";
 
 export default function CustomShareModal({
   visible,
@@ -28,6 +30,7 @@ export default function CustomShareModal({
       const isAvailable = await Sharing.isAvailableAsync();
       if (isAvailable) {
         await Sharing.shareAsync(uri);
+
       } else {
         alert("Sharing not available");
       }
@@ -37,7 +40,7 @@ export default function CustomShareModal({
       alert("Failed to share image");
     }
   };
-
+  // const { showRewardAd } = useRewardAd();
   const saveToGallery = async () => {
     try {
       const permission = await MediaLibrary.requestPermissionsAsync();
@@ -52,6 +55,16 @@ export default function CustomShareModal({
       });
       const asset = await MediaLibrary.createAssetAsync(uri);
       await MediaLibrary.createAlbumAsync("Shayari", asset, false);
+      // const current = Number(await AsyncStorage.getItem("Sharecount")) || 0;
+      // const updatedCount = current + 1;
+      // console.log("share count ", updatedCount);
+
+      // await AsyncStorage.setItem("Sharecount", String(updatedCount));
+
+      // ✅ Show ad after every 3 copies
+      // if (updatedCount % 3 === 0) {
+      //   showRewardAd(); // <-- You must define this function (see below)
+      // }
       alert("Saved to gallery");
       onClose();
     } catch (e) {
@@ -67,7 +80,7 @@ export default function CustomShareModal({
           <CrossXMark width={22} height={20} fill="#000" />
         </TouchableOpacity>
 
-        <View style={styles.previewBox} />
+        <NativeCard />
 
         <View style={styles.buttonRow}>
           <TouchableOpacity
@@ -135,29 +148,20 @@ const styles = StyleSheet.create({
     padding: 6,
     zIndex: 10,
   },
-  previewBox: {
-    width: 300,
-    height: 140,
-    backgroundColor: "#ddd",
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 20,
-  },
+
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "100%",
+    // width: "100%",
   },
   shareButton: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#19173D",
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     borderRadius: 30,
     marginHorizontal: 4,
-    flex: 1,
     justifyContent: "center",
   },
   saveButton: {

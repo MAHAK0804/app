@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../ThemeContext";
 import axios from "axios";
 import SvgImageWithFallback from "../SvgImage";
-import { fontScale, scaleFont } from "../Responsive";
+import { fontScale, scale, scaleFont } from "../Responsive";
 
 const { width } = Dimensions.get("window");
 const numColumns = 3;
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: 6,
     paddingTop: 10,
-    paddingBottom: 20,
+    paddingBottom: scale(90),
   },
   cardWrapper: {
     alignItems: "center",

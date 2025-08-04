@@ -8,9 +8,10 @@ import {
   ImageBackground,
   TouchableOpacity,
   ScrollView,
+  SafeAreaView,
 } from "react-native";
 
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import WheelColorPicker from "react-native-wheel-color-picker";
@@ -19,13 +20,14 @@ import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomAlert from "../CustomAlert";
 import TextIcon from "../assets/blacktext.svg";
-import UploadGallery from "../assets/upload.svg";
-import ShayariCardActions from "../Action";
+import WhiteShareIcon from "../assets/share.svg";
+import BackArrow from "../assets/left arrow.svg";
+
 import CustomShareModal from "../CustomShareModal";
-import { fontScale, moderateScale, scaleFont } from "../Responsive";
+import { fontScale, moderateScale, scale, scaleFont, verticalScale } from "../Responsive";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 10;
-const CARD_HEIGHT = SCREEN_HEIGHT * 0.57;
+const CARD_HEIGHT = SCREEN_HEIGHT * 0.6;
 
 export default function ShayariCardExact({ route }) {
   const [fontSize, setFontSize] = useState(23);
@@ -68,6 +70,7 @@ export default function ShayariCardExact({ route }) {
     setSelectedCardRef(cardRef);
     setCustomShareModalVisible(true);
   }, []);
+  const navigation = useNavigation()
   useEffect(() => {
     if (customAlertVisible) {
       setshowforSave(true);
@@ -166,325 +169,351 @@ export default function ShayariCardExact({ route }) {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Shayari Card Row */}
-      <View style={styles.cardRow}>
-        <CustomAlert
-          visible={customAlertVisible}
-          title={alertTitle}
-          message={alertMessage}
-          onClose={() => setCustomAlertVisible(false)}
-        />
+    <>
+      <SafeAreaView style={styles.safeArea}>
 
-        <View
-          style={[
-            styles.backgroundCard,
-            backgroundColor && { backgroundColor },
-          ]}
-          ref={cardRef}
-          collapsable={false}
-        >
-          {/* ✅ Background Image with Opacity */}
-          {backgroundImage && (
-            <Image
-              source={backgroundImage}
-              style={[
-                StyleSheet.absoluteFillObject,
-                {
-                  width: CARD_WIDTH,
-                  height: CARD_HEIGHT,
-                  resizeMode: "cover",
-                  opacity: opacity, // ✅ only image gets opacity
-                  borderTopLeftRadius: 12,
-                  borderTopRightRadius: 12,
-                },
-              ]}
-            />
-          )}
+        <View style={styles.customHeader}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.iconLeft}
+          >
+            {/* <Ionicons name="arrow-back" size={24} color="#fff" /> */}
+            <BackArrow width={40} height={40} />
 
-          {/* ✅ Foreground Content */}
-          <View style={styles.innerRow}>
-            {/* Font Size Slider */}
-            {showforSave && (
-              <View style={styles.sliderCard}>
-                <View style={styles.sliderColumn}>
-                  <Slider
-                    style={styles.verticalSlider}
-                    minimumValue={10}
-                    maximumValue={30}
-                    value={fontSize}
-                    onValueChange={setFontSize}
-                    minimumTrackTintColor="#000"
-                    maximumTrackTintColor="#000"
-                    thumbTintColor="#000"
-                  />
-                </View>
-              </View>
-            )}
+          </TouchableOpacity>
 
-            {/* Shayari Text */}
-            <View style={styles.textWrapper}>
-              <Text
+          <View style={styles.titleContainer}>
+            <Text
+              numberOfLines={1}
+              style={[styles.headerTitleText, { color: '#FFFFFF' }]}
+            >
+              Edit
+            </Text>
+          </View>
+          <TouchableOpacity onPress={handleShare} style={{ marginRight: scale(7) }}>
+            <WhiteShareIcon width={40} height={40} />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+      <View style={styles.container}>
+        {/* Shayari Card Row */}
+        <View style={styles.cardRow}>
+          <CustomAlert
+            visible={customAlertVisible}
+            title={alertTitle}
+            message={alertMessage}
+            onClose={() => setCustomAlertVisible(false)}
+          />
+
+          <View
+            style={[
+              styles.backgroundCard,
+              backgroundColor && { backgroundColor },
+            ]}
+            ref={cardRef}
+            collapsable={false}
+          >
+            {/* ✅ Background Image with Opacity */}
+            {backgroundImage && (
+              <Image
+                source={backgroundImage}
                 style={[
-                  styles.shayariText,
+                  StyleSheet.absoluteFillObject,
                   {
-                    fontSize,
-                    fontFamily,
-                    fontWeight,
-                    fontStyle,
-                    color: fontColor,
-                    textAlign,
-                    lineHeight: fontSize * 1.4,
+                    width: CARD_WIDTH,
+                    height: CARD_HEIGHT,
+                    resizeMode: "cover",
+                    opacity: opacity, // ✅ only image gets opacity
+                    borderRadius: 12,
                   },
                 ]}
-              >
-                {shayari}
-              </Text>
+              />
+            )}
+
+            {/* ✅ Foreground Content */}
+            <View style={styles.innerRow}>
+              {/* Font Size Slider */}
+              {showforSave && (
+                <View style={styles.sliderCard}>
+                  <View style={styles.sliderColumn}>
+                    <Slider
+                      style={styles.verticalSlider}
+                      minimumValue={10}
+                      maximumValue={30}
+                      value={fontSize}
+                      onValueChange={setFontSize}
+                      minimumTrackTintColor="#000"
+                      maximumTrackTintColor="#000"
+                      thumbTintColor="#000"
+                    />
+                  </View>
+                </View>
+              )}
+
+              {/* Shayari Text */}
+              <View style={styles.textWrapper}>
+                <Text
+                  style={[
+                    styles.shayariText,
+                    {
+                      fontSize,
+                      fontFamily,
+                      fontWeight,
+                      fontStyle,
+                      color: fontColor,
+                      textAlign,
+                      lineHeight: fontSize * 1.4,
+                    },
+                  ]}
+                >
+                  {shayari}
+                </Text>
+              </View>
+
+              {/* Opacity Slider */}
+              {showforSave && (
+                <View style={styles.sliderCard}>
+                  <View style={styles.sliderColumn}>
+                    <Slider
+                      style={styles.verticalSlider}
+                      minimumValue={0}
+                      maximumValue={1}
+                      step={0.01}
+                      value={opacity}
+                      onValueChange={setOpacity}
+                      minimumTrackTintColor="#000"
+                      maximumTrackTintColor="#000"
+                      thumbTintColor="#000"
+                    />
+                  </View>
+                </View>
+              )}
             </View>
 
-            {/* Opacity Slider */}
-            {showforSave && (
-              <View style={styles.sliderCard}>
-                <View style={styles.sliderColumn}>
-                  <Slider
-                    style={styles.verticalSlider}
-                    minimumValue={0}
-                    maximumValue={1}
-                    step={0.01}
-                    value={opacity}
-                    onValueChange={setOpacity}
-                    minimumTrackTintColor="#000"
-                    maximumTrackTintColor="#000"
-                    thumbTintColor="#000"
-                  />
+            {/* Font Family Selector */}
+            {showFontOptions && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.fontScrollViewAbsolute} // New style for absolute positioning
+                contentContainerStyle={styles.fontScrollViewContent}
+              >
+                {fonts.map((font) => (
+                  <TouchableOpacity
+                    key={font.name}
+                    style={[
+                      styles.fontItem,
+                      fontFamily === font.name && styles.fontItemSelected,
+                    ]}
+                    onPress={() => setFontFamily(font.name)}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: font.name,
+                        fontSize: fontScale * scaleFont(16),
+                        color: fontFamily === font.name ? "#fff" : "#000",
+                      }}
+                    >
+                      {font.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+            {showStyleOptions && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.fontScrollViewAbsolute} // New style for absolute positioning
+                contentContainerStyle={styles.fontScrollViewContent}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    marginTop: 10,
+                    // backgroundColor: "#f1f1f1",
+                    paddingVertical: 5,
+                  }}
+                >
+                  {/* Regular */}
+                  <TouchableOpacity
+                    style={[
+                      styles.fontItem,
+                      fontWeight === "normal" &&
+                      fontStyle === "normal" &&
+                      styles.fontItemSelected,
+                    ]}
+                    onPress={() => {
+                      setFontWeight("normal");
+                      setFontStyle("normal");
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: fontScale * scaleFont(14),
+                        color:
+                          fontWeight === "normal" && fontStyle === "normal"
+                            ? "#fff"
+                            : "#000",
+                      }}
+                    >
+                      Regular
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Bold */}
+                  <TouchableOpacity
+                    style={[
+                      styles.fontItem,
+                      fontWeight === "bold" && styles.fontItemSelected,
+                    ]}
+                    onPress={() => {
+                      setFontWeight("bold");
+                      setFontStyle("normal");
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: fontScale * scaleFont(14),
+                        color: fontWeight === "bold" ? "#fff" : "#000",
+                      }}
+                    >
+                      Bold
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Italic */}
+                  <TouchableOpacity
+                    style={[
+                      styles.fontItem,
+                      fontStyle === "italic" && styles.fontItemSelected,
+                    ]}
+                    onPress={() => {
+                      setFontStyle("italic");
+                      setFontWeight("normal");
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontStyle: "italic",
+                        fontSize: fontScale * scaleFont(14),
+                        color: fontStyle === "italic" ? "#fff" : "#000",
+                      }}
+                    >
+                      Italic
+                    </Text>
+                  </TouchableOpacity>
                 </View>
+              </ScrollView>
+            )}
+            {showColorPicker && (
+              <View style={styles.colorPickerContainer}>
+                <WheelColorPicker
+                  initialColor={fontColor}
+                  onColorChangeComplete={(color) => {
+                    setFontColor(color); // only update color, don't close yet
+                  }}
+                  style={{ width: "100%", height: 100 }}
+                />
               </View>
             )}
-          </View>
-
-          {/* Font Family Selector */}
-          {showFontOptions && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.fontScrollViewAbsolute} // New style for absolute positioning
-              contentContainerStyle={styles.fontScrollViewContent}
-            >
-              {fonts.map((font) => (
-                <TouchableOpacity
-                  key={font.name}
-                  style={[
-                    styles.fontItem,
-                    fontFamily === font.name && styles.fontItemSelected,
-                  ]}
-                  onPress={() => setFontFamily(font.name)}
-                >
-                  <Text
+            {showBgPicker && (
+              <View style={styles.bgPickerContainer}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {/* Upload from gallery option */}
+                  <TouchableOpacity
+                    onPress={pickImageFromGallery}
                     style={{
-                      fontFamily: font.name,
-                      fontSize: fontScale * scaleFont(16),
-                      color: fontFamily === font.name ? "#fff" : "#000",
+                      width: 80,
+                      height: 80,
+                      paddingRight: 5,
+                      marginRight: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
+
                     }}
                   >
-                    {font.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          )}
-          {showStyleOptions && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.fontScrollViewAbsolute} // New style for absolute positioning
-              contentContainerStyle={styles.fontScrollViewContent}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  marginTop: 10,
-                  // backgroundColor: "#f1f1f1",
-                  paddingVertical: 5,
-                }}
-              >
-                {/* Regular */}
-                <TouchableOpacity
-                  style={[
-                    styles.fontItem,
-                    fontWeight === "normal" &&
-                    fontStyle === "normal" &&
-                    styles.fontItemSelected,
-                  ]}
-                  onPress={() => {
-                    setFontWeight("normal");
-                    setFontStyle("normal");
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: fontScale * scaleFont(14),
-                      color:
-                        fontWeight === "normal" && fontStyle === "normal"
-                          ? "#fff"
-                          : "#000",
-                    }}
-                  >
-                    Regular
-                  </Text>
-                </TouchableOpacity>
-
-                {/* Bold */}
-                <TouchableOpacity
-                  style={[
-                    styles.fontItem,
-                    fontWeight === "bold" && styles.fontItemSelected,
-                  ]}
-                  onPress={() => {
-                    setFontWeight("bold");
-                    setFontStyle("normal");
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: fontScale * scaleFont(14),
-                      color: fontWeight === "bold" ? "#fff" : "#000",
-                    }}
-                  >
-                    Bold
-                  </Text>
-                </TouchableOpacity>
-
-                {/* Italic */}
-                <TouchableOpacity
-                  style={[
-                    styles.fontItem,
-                    fontStyle === "italic" && styles.fontItemSelected,
-                  ]}
-                  onPress={() => {
-                    setFontStyle("italic");
-                    setFontWeight("normal");
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontStyle: "italic",
-                      fontSize: fontScale * scaleFont(14),
-                      color: fontStyle === "italic" ? "#fff" : "#000",
-                    }}
-                  >
-                    Italic
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          )}
-          {showColorPicker && (
-            <View style={styles.colorPickerContainer}>
-              <WheelColorPicker
-                initialColor={fontColor}
-                onColorChangeComplete={(color) => {
-                  setFontColor(color); // only update color, don't close yet
-                }}
-                style={{ width: "100%", height: 100 }}
-              />
-            </View>
-          )}
-          {showBgPicker && (
-            <View style={styles.bgPickerContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {/* Upload from gallery option */}
-                <TouchableOpacity
-                  onPress={pickImageFromGallery}
-                  style={{
-                    width: 80,
-                    height: 80,
-                    paddingRight: 5,
-                    marginRight: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-
-                  }}
-                >
-                  <View style={{ width: 80, height: 80 }}>
-                    {/* <UploadGallery
+                    <View style={{ width: 80, height: 80 }}>
+                      {/* <UploadGallery
                       width="100%"
                       height="100%"
                       key={uploadIconKey}
                     /> */}
-                    <Image source={require('../assets/upload.png')} style={{ width: "100%", height: "100%" }} />
-                  </View>
-                </TouchableOpacity>
-
-                {/* Predefined background images */}
-                {[
-                  require("../assets/image_1.webp"),
-                  require("../assets/image_2.webp"),
-                  require("../assets/image_3.3.webp"),
-                  require("../assets/image_4.webp"),
-                  require("../assets/image_5.webp"),
-                  require("../assets/image_6.webp"),
-                  require("../assets/image_7.webp"),
-                  require("../assets/image_8.webp"),
-                  require("../assets/image_9.webp"),
-                  require("../assets/image_10.webp"),
-                  require("../assets/image_11.webp"),
-                  // require("../assets/image_12.webp"),
-                  require("../assets/image_13.webp"),
-                  // require("../assets/image_14.webp"),
-                ].map((img, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => {
-                      setBackgroundImage(img);
-                      setBackgroundColor(null);
-                    }}
-                    style={styles.bgImageOption}
-                  >
-                    <Image
-                      source={img}
-                      style={{
-                        width: 80,
-                        height: 80,
-                      }}
-                    />
+                      <Image source={require('../assets/upload.png')} style={{ width: "100%", height: "100%" }} />
+                    </View>
                   </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
 
-          {showBgColorPicker && (
-            <View style={styles.colorPickerContainer}>
-              <WheelColorPicker
-                initialColor={backgroundColor || "#ffffff"}
-                onColorChangeComplete={(color) => {
-                  setBackgroundColor(color);
-                  setBackgroundImage(null); // remove image
-                }}
-                style={{ width: "100%", height: 180 }}
-              />
-            </View>
-          )}
+                  {/* Predefined background images */}
+                  {[
+                    require("../assets/image_1.webp"),
+                    require("../assets/image_2.webp"),
+                    require("../assets/image_3.3.webp"),
+                    require("../assets/image_4.webp"),
+                    require("../assets/image_5.webp"),
+                    require("../assets/image_6.webp"),
+                    require("../assets/image_7.webp"),
+                    require("../assets/image_8.webp"),
+                    require("../assets/image_9.webp"),
+                    require("../assets/image_10.webp"),
+                    require("../assets/image_11.webp"),
+                    // require("../assets/image_12.webp"),
+                    require("../assets/image_13.webp"),
+                    // require("../assets/image_14.webp"),
+                  ].map((img, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => {
+                        setBackgroundImage(img);
+                        setBackgroundColor(null);
+                      }}
+                      style={styles.bgImageOption}
+                    >
+                      <Image
+                        source={img}
+                        style={{
+                          width: 80,
+                          height: 80,
+                        }}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {showBgColorPicker && (
+              <View style={styles.colorPickerContainer}>
+                <WheelColorPicker
+                  initialColor={backgroundColor || "#ffffff"}
+                  onColorChangeComplete={(color) => {
+                    setBackgroundColor(color);
+                    setBackgroundImage(null); // remove image
+                  }}
+                  style={{ width: "100%", height: 180 }}
+                />
+              </View>
+            )}
+          </View>
         </View>
-      </View>
 
-      <CustomShareModal
-        visible={customShareModalVisible}
-        onClose={() => setCustomShareModalVisible(false)}
-        cardRef={selectedCardRef}
-        shayari={selectedShayari}
-      />
-      {/* Action Buttons */}
-      <View style={{ marginBottom: 20 }}>
+        <CustomShareModal
+          visible={customShareModalVisible}
+          onClose={() => setCustomShareModalVisible(false)}
+          cardRef={selectedCardRef}
+          shayari={selectedShayari}
+        />
+        {/* Action Buttons */}
+        {/* <View style={{ marginBottom: 20 }}>
         <ShayariCardActions
           shayari={route.params.shayari}
           onShare={() => handleShare(route.params.shayari)}
           isEdit={false}
           isExpand={false}
           isBg={true}
-        />
+          isIcon={false}
+        /> */}
 
         {/* Grid Menu */}
         <View style={styles.gridContainer}>
@@ -526,13 +555,39 @@ export default function ShayariCardExact({ route }) {
           ))}
         </View>
       </View>
-    </View>
+    </>
+
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
-
+  safeArea: {
+    flex: 0,
+  },
+  customHeader: {
+    backgroundColor: "#191734", // Match the header background
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between", // Space between items
+    paddingHorizontal: scale(10),
+    paddingTop: verticalScale(30), // Adjusted vertical padding
+    paddingBottom: verticalScale(20),
+    elevation: 4,
+  },
+  iconLeft: {
+    // marginVertical: 2,
+  },
+  titleContainer: {
+    flex: 1,
+    justifyContent: "center", // Center title vertically
+    marginHorizontal: 10,
+  },
+  headerTitleText: {
+    fontSize: fontScale * scaleFont(18),
+    textAlign: "start", // Center text
+    fontFamily: "Manrope_400Regular",
+  },
   cardRow: {
     flexDirection: "row",
     justifyContent: "center",
@@ -546,8 +601,7 @@ const styles = StyleSheet.create({
   },
 
   imageBorder: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 20,
 
     resizeMode: "cover",
   },
@@ -618,8 +672,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   gridItem: {
-    width: (SCREEN_WIDTH - 70) / 3,
-    aspectRatio: 1.25,
+    width: (SCREEN_WIDTH - 50) / 3,
+    aspectRatio: 1.3,
     justifyContent: "center",
     alignItems: "center",
     margin: 5,
